@@ -1,86 +1,103 @@
 <template>
-  <div class="viewport">
+  <div
+    class="viewport"
+    :class="{ 'theme-dark': isDark, 'theme-light': !isDark }"
+  >
+    <!-- 直接使用封装好的导航栏组件 -->
+    <TabVue @theme-change="onThemeChange" @page-lock="handlePageLock" />
+
     <div class="wrapper" :style="wrapperStyle">
       <div class="page">
-        <div style="width:100vw;height:100vh;background:#000;color:#fff;display:flex;justify-content:center;align-items:center;flex-direction:column;">
-          <h1 style="font-size:40px">Welcome ! My friend</h1>
+        <div class="page-content">
+          <h1 style="font-size: 40px">Welcome ! My friend</h1>
         </div>
       </div>
-
       <div class="page">
-        <div style="width:100vw;height:100vh;background:#000;color:#fff;display:flex;justify-content:center;align-items:center;">
-          第二页
+        <div class="page-content">
+          <div class="card-list">
+            <!-- 卡片1 -->
+            <FlipCard
+              :imgSrc="card1"
+              title="Cycle"
+              text="A cycle of my life, my hobby is cycle."
+            />
+          </div>
         </div>
       </div>
-
       <div class="page">
-        <div style="width:100vw;height:100vh;background:#000;color:#fff;display:flex;justify-content:center;align-items:center;">
-          456 (第三页)
-        </div>
+        <div class="page-content">456 (第三页)</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import TabVue from "./components/TabVue/index.vue";
+import FlipCard from "./components/FlipCard/index.vue";
+import card1 from '@/assets/card1.jpg'
 
-let startY = 0
-const current = ref(0)
-const total = 3
-const animating = ref(false)
+const isDark = ref(true);
+function onThemeChange(val) {
+  isDark.value = val;
+}
+
+let startY = 0;
+const current = ref(0);
+const total = 3;
+const animating = ref(false);
+const pageLocked = ref(false);
 
 const wrapperStyle = computed(() => ({
   transform: `translateY(-${current.value * 100}vh)`,
-  transition: animating.value ? 'transform 0.7s ease' : 'none',
-}))
+  transition: animating.value ? "transform 0.7s ease" : "none",
+}));
+
+const handlePageLock = (val) => {
+  pageLocked.value = val;
+};
 
 const change = (dir) => {
-  if (animating.value) return
-  if (dir === 'up' && current.value < total - 1) {
-    current.value++
-    animating.value = true
+  if (animating.value) return;
+  if (pageLocked.value) return;
+  if (dir === "up" && current.value < total - 1) {
+    current.value++;
+    animating.value = true;
   }
-  if (dir === 'down' && current.value > 0) {
-    current.value--
-    animating.value = true
+  if (dir === "down" && current.value > 0) {
+    current.value--;
+    animating.value = true;
   }
-}
+};
 
-// PC滚轮
 const wheel = (e) => {
-  e.preventDefault()
-  change(e.deltaY > 0 ? 'up' : 'down')
-}
-
-// 触摸
-const touchStart = (e) => startY = e.touches[0].clientY
-const touchMove = (e) => e.preventDefault()
+  e.preventDefault();
+  change(e.deltaY > 0 ? "up" : "down");
+};
+const touchStart = (e) => (startY = e.touches[0].clientY);
+const touchMove = (e) => e.preventDefault();
 const touchEnd = (e) => {
-  const diff = startY - e.changedTouches[0].clientY
-  if (Math.abs(diff) > 50) change(diff > 0 ? 'up' : 'down')
-}
-
-// 动画结束
-const end = () => animating.value = false
+  const diff = startY - e.changedTouches[0].clientY;
+  if (Math.abs(diff) > 50) change(diff > 0 ? "up" : "down");
+};
+const end = () => (animating.value = false);
 
 onMounted(() => {
-  const el = document.querySelector('.wrapper')
-  el.addEventListener('transitionend', end)
-  window.addEventListener('wheel', wheel, { passive: false })
-  window.addEventListener('touchstart', touchStart, { passive: false })
-  window.addEventListener('touchmove', touchMove, { passive: false })
-  window.addEventListener('touchend', touchEnd, { passive: false })
-})
-
+  const el = document.querySelector(".wrapper");
+  el.addEventListener("transitionend", end);
+  window.addEventListener("wheel", wheel, { passive: false });
+  window.addEventListener("touchstart", touchStart, { passive: false });
+  window.addEventListener("touchmove", touchMove, { passive: false });
+  window.addEventListener("touchend", touchEnd, { passive: false });
+});
 onUnmounted(() => {
-  const el = document.querySelector('.wrapper')
-  el.removeEventListener('transitionend', end)
-  window.removeEventListener('wheel', wheel)
-  window.removeEventListener('touchstart', touchStart)
-  window.removeEventListener('touchmove', touchMove)
-  window.removeEventListener('touchend', touchEnd)
-})
+  const el = document.querySelector(".wrapper");
+  el.removeEventListener("transitionend", end);
+  window.removeEventListener("wheel", wheel);
+  window.removeEventListener("touchstart", touchStart);
+  window.removeEventListener("touchmove", touchMove);
+  window.removeEventListener("touchend", touchEnd);
+});
 </script>
 
 <style scoped>
@@ -91,17 +108,51 @@ onUnmounted(() => {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+.theme-dark {
   background: #000;
 }
+.theme-light {
+  background: #fff;
+}
+
 .wrapper {
   width: 100%;
   height: 100vh;
   display: flex;
   flex-direction: column;
+  margin-top: 80px;
 }
 .page {
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 80px);
   flex-shrink: 0;
+}
+.page-content {
+  width: 100vw;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: #fff;
+}
+.theme-light .page-content {
+  color: #000;
+  background: #fff;
+}
+.theme-dark .page-content {
+  background: #000;
+  color: #fff;
+}
+
+/* 卡片 */
+.card-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  padding: 40px 0;
 }
 </style>
