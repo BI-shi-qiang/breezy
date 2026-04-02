@@ -15,13 +15,15 @@ export default defineConfig({
   },
   base: "/breezy/",
   build: {
-    chunkSizeWarningLimit: 1000, // 取消体积警告
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          three: ["three"],
-        },
-      },
-    },
-  },
+        manualChunks(id) {
+          if (id.includes('three')) {
+            return 'three'
+          }
+        }
+      }
+    }
+  }
 });
