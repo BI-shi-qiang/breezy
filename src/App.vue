@@ -25,7 +25,9 @@
         </div>
       </div>
       <div class="page">
-        <div class="page-content">456 (第三页)</div>
+        <div class="page-content">
+          <MagicCube />
+        </div>
       </div>
     </div>
   </div>
@@ -35,6 +37,7 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import TabVue from "./components/TabVue/index.vue";
 import FlipCard from "./components/FlipCard/index.vue";
+import MagicCube from "./components/MagicCube/index.vue";
 import card1 from '@/assets/card1.jpg'
 
 const isDark = ref(true);
