@@ -14,8 +14,7 @@
             <span class="about-me">ABOUT ME</span>
           </h1>
           <p class="description">
-            Hi There, I'm BiShiqiang and I am a Front-End Web Developer based in China. It's been 1 years, I'm a student deeply passionate about front-end development. I’ve built several practice websites to sharpen my skills and enjoy turning ideas into clean, interactive experiences. Outside of coding, I love sports—especially playing table tennis, running, and cycling.
-            Front-end development is where my passion truly lies, and I’m committed to growing and improving every day.
+            Hi, I'm Bi Shiqiang, a front-end web developer based in China. As a student with a deep passion for coding, I enjoy turning ideas into clean, interactive websites. Outside of development, I love sports like table tennis, running, and cycling. I am committed to growing and improving in this field every day.
           </p>
           <a href="https://github.com/BI-shi-qiang" target="_blank" class="github-link">
             <span class="github-icon">⚫</span> https://github.com/BI-shi-qiang
@@ -54,8 +53,6 @@
               <li>Typescript</li>
             </ul>
           </div>
-          
-          <button class="exit-btn">EXIT</button>
         </div>
       </div>
     </section>
@@ -88,25 +85,21 @@ const props = defineProps({
 
 /* 核心：吊牌卡片样式 */
 .hanging-tag-card {
-  --paper-bg: #f9f2e6; /* 复古纸张底色 */
+  --paper-bg: #f9f2e6;
   --shadow-color: rgba(0, 0, 0, 0.4);
   position: relative;
   width: 100%;
   max-width: 1200px;
   min-height: 600px;
   background: var(--paper-bg);
-  
-  /* 1. 非高清/纸张质感 */
-  filter: blur(0.2px) grayscale(2%); /* 轻微模糊和灰度，模拟纸质噪点 */
+  filter: blur(0.2px) grayscale(2%);
   opacity: 0.95;
   
   /* 2. 吊牌悬挂效果 */
-  transform: rotate(-1deg); /* 整体微旋转，更像挂上去的 */
+  transform: rotate(-1deg);
   box-shadow: 
-    0 5px 15px var(--shadow-color), /* 主投影 */
-    0 0 30px rgba(0,0,0,0.1) inset; /* 内阴影，增加纸张厚度感 */
-  
-  /* 圆角 */
+    0 5px 15px var(--shadow-color),
+    0 0 30px rgba(0,0,0,0.1) inset;
   border-radius: 4px;
 }
 
@@ -311,30 +304,16 @@ const props = defineProps({
   color: #ddd;
 }
 
-/* 退出按钮 */
-.exit-btn {
-  padding: 8px 20px;
-  background: #333;
-  color: #fff;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 20px;
-  align-self: flex-end;
-}
-
-.dark-theme .exit-btn {
-  background: #fff;
-  color: #333;
-}
-
 /* 响应式：移动端适配 */
 @media (max-width: 900px) {
   .card-content {
     flex-direction: column;
     align-items: center;
   }
-  
+  .avatar-frame {
+    width: 300px;
+    height: 200px;
+  }
   .sidebar-section {
     width: 100%;
   }

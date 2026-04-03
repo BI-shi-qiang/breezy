@@ -1,7 +1,24 @@
 <template>
   <div class="rubiks-container">
     <div class="control-panel">
-      <h3>解腻小魔方</h3>
+      <h3>魔方</h3>
+
+      <!-- 新增：模式切换 -->
+      <div class="mode-select">
+        <button
+          :class="mode === 'game' ? 'active' : ''"
+          @click="switchMode('game')"
+        >
+          游戏模式
+        </button>
+        <button
+          :class="mode === 'show' ? 'active' : ''"
+          @click="switchMode('show')"
+        >
+          展示模式
+        </button>
+      </div>
+
       <div class="axis-select">
         <label>选择轴：</label>
         <button 
@@ -9,6 +26,7 @@
           :key="axis"
           :class="activeAxis === axis ? 'active' : ''"
           @click="switchAxis(axis)"
+          :disabled="mode === 'show'"
         >
           {{ axis.toUpperCase() }}轴
         </button>
@@ -20,14 +38,15 @@
           :key="layer"
           :class="activeLayer === layer ? 'active' : ''"
           @click="switchLayer(layer)"
+          :disabled="mode === 'show'"
         >
           {{ layer === -1 ? '左/底/后' : layer === 0 ? '中' : '右/顶/前' }}
         </button>
       </div>
       <div class="rotate-btns">
-        <button @click="rotateLayer(true)">顺时针旋转 90°</button>
-        <button @click="rotateLayer(false)">逆时针旋转 90°</button>
-        <button class="reset-btn" @click="resetCube">🔄 重置魔方</button>
+        <button @click="rotateLayer(true)" :disabled="mode === 'show'">顺时针旋转 90°</button>
+        <button @click="rotateLayer(false)" :disabled="mode === 'show'">逆时针旋转 90°</button>
+        <button class="reset-btn" @click="resetCube" :disabled="mode === 'show'">重置魔方</button>
       </div>
     </div>
     <canvas ref="canvasContainer" class="cube-canvas"></canvas>
@@ -46,24 +65,26 @@ let cubeGroup = new THREE.Group()
 let cubies = []
 let isRotating = false
 
+// 原有状态
 const activeAxis = ref('y')
 const activeLayer = ref(0)
 
+// 新增：模式
+const mode = ref('show')
+const autoRotateSpeed = 0.003
+const blendSpeed = 0.1
+
 const COLORS = {
-  U: 0xFFFFFF, // 上层 - 白色
-  D: 0xFFFF00, // 下层 - 黄色
-  F: 0xFF0000, // 正面 - 红色
-  B: 0xFFA500, // 背面 - 橙色
-  L: 0x0000FF, // 左面 - 蓝色
-  R: 0x00FF00  // 右面 - 绿色
+  U: 0xFFFFFF, D: 0xFFFF00, F: 0xFF0000,
+  B: 0xFFA500, L: 0x0000FF, R: 0x00FF00
 };
 
-// 世界坐标工具（永不改变）
 const worldPos = new THREE.Vector3()
 
+// 初始化场景
 function initScene() {
   scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x1a1a2e)
+  scene.background = new THREE.Color(0x000000)
   
   camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
   camera.position.set(8, 8, 8)
@@ -83,9 +104,13 @@ function initScene() {
   controls.enableDamping = true
   controls.dampingFactor = 0.05
   
+  controls.minDistance = 5
+  controls.maxDistance = 12
+
   scene.add(cubeGroup)
 }
 
+// 创建小方块
 function createCubie(x, y, z) {
   const size = 0.95
   const geometry = new THREE.BoxGeometry(size, size, size)
@@ -113,6 +138,7 @@ function createCubie(x, y, z) {
   return cube
 }
 
+// 初始化魔方
 function initRubiksCube() {
   cubies = []
   for (let x = -1; x <= 1; x++) {
@@ -127,57 +153,59 @@ function initRubiksCube() {
   updateHighlight()
 }
 
+// 切换轴/层级
 function switchAxis(axis) {
-  if (isRotating) return
+  if (isRotating || mode.value === 'show') return
   activeAxis.value = axis
   updateHighlight()
 }
-
 function switchLayer(layer) {
-  if (isRotating) return
+  if (isRotating || mode.value === 'show') return
   activeLayer.value = layer
   updateHighlight()
 }
 
-// ==================== ✅ 修复核心：使用真实世界坐标判断 ====================
+// 高亮
 function updateHighlight() {
-  const axis = activeAxis.value
-  const layer = activeLayer.value
-  
-  cubies.forEach(cubie => {
-    // 获取小方块在世界中的真实坐标（不受父级旋转影响）
-    cubie.getWorldPosition(worldPos)
-    
-    let isSelected = false
-    // 四舍五入解决浮点误差
-    const wx = Math.round(worldPos.x)
-    const wy = Math.round(worldPos.y)
-    const wz = Math.round(worldPos.z)
+  // 如果是展示模式或者正在旋转，直接返回（不处理高亮）
+  if (mode.value === 'show' || isRotating) return;
 
-    if (axis === 'x' && wx === layer) isSelected = true
-    if (axis === 'y' && wy === layer) isSelected = true
-    if (axis === 'z' && wz === layer) isSelected = true
+  const axis = activeAxis.value;
+  const layer = activeLayer.value; // 注意：这里原来是 activeAxis，我修正为 activeLayer
+
+  cubies.forEach(cubie => {
+    cubie.getWorldPosition(worldPos);
+    let isSelected = false;
     
-    cubie.userData.isHighlighted = isSelected
-    cubie.userData.border.visible = isSelected
-  })
+    // 获取当前方块在世界坐标系中的整数位置
+    const wx = Math.round(worldPos.x);
+    const wy = Math.round(worldPos.y);
+    const wz = Math.round(worldPos.z);
+
+    // 判断是否属于当前选中的层
+    if (axis === 'x' && wx === layer) isSelected = true;
+    if (axis === 'y' && wy === layer) isSelected = true;
+    if (axis === 'z' && wz === layer) isSelected = true;
+
+    // ✅ 核心逻辑：选中变白，未选中变黑
+    cubie.userData.border.material.color.set(isSelected ? 0xffffff : 0x000000);
+  });
 }
 
+// 旋转层
 function rotateLayer(clockwise) {
-  if (isRotating) return
+  if (isRotating || mode.value === 'show') return
   isRotating = true
   
   const axis = activeAxis.value
   const layer = activeLayer.value
   const targetAngle = clockwise ? -Math.PI / 2 : Math.PI / 2
   
-  // ==================== ✅ 修复核心：旋转前也用世界坐标筛选 ====================
   const targetCubies = cubies.filter(cubie => {
     cubie.getWorldPosition(worldPos)
     const wx = Math.round(worldPos.x)
     const wy = Math.round(worldPos.y)
     const wz = Math.round(worldPos.z)
-
     if (axis === 'x') return wx === layer
     if (axis === 'y') return wy === layer
     if (axis === 'z') return wz === layer
@@ -185,10 +213,7 @@ function rotateLayer(clockwise) {
 
   const pivot = new THREE.Group()
   scene.add(pivot)
-
-  targetCubies.forEach(cubie => {
-    pivot.attach(cubie)
-  })
+  targetCubies.forEach(cubie => pivot.attach(cubie))
 
   let currentAngle = 0
   const animateRotate = () => {
@@ -213,14 +238,14 @@ function finishRotation(targetCubies, pivot) {
     cubeGroup.attach(cubie)
     cubie.updateMatrixWorld(true)
   })
-
   scene.remove(pivot)
   updateHighlight()
   isRotating = false
 }
 
+// 重置
 function resetCube() {
-  if (isRotating) return
+  if (isRotating || mode.value === 'show') return
   cubies.forEach(cubie => {
     cubie.position.copy(cubie.userData.originalPos)
     cubie.rotation.set(0, 0, 0)
@@ -231,12 +256,68 @@ function resetCube() {
   updateHighlight()
 }
 
+function switchMode(newMode) {
+  if (isRotating) return
+  mode.value = newMode
+
+  if (newMode === 'show') {
+    controls.enabled = false
+  } else {
+    controls.enabled = true
+  }
+}
+
+function updateShowMode() {
+  const isShow = mode.value === 'show';
+
+  if (isShow) {
+    cubeGroup.rotation.y += autoRotateSpeed;
+  } else {
+    cubeGroup.rotation.y *= 0.9; // 阻尼回归
+  }
+
+  cubies.forEach(c => {
+    const ox = c.userData.originalPos.x;
+    const oy = c.userData.originalPos.y;
+    const oz = c.userData.originalPos.z;
+
+    let targetX, targetY, targetZ;
+    if (isShow) {
+      targetX = ox + (ox === 0 ? 0 : ox * 1.3);
+      targetY = oy + (oy === 0 ? 0 : oy * 1.3);
+      targetZ = oz + (oz === 0 ? 0 : oz * 1.3);
+    } else {
+      targetX = ox;
+      targetY = oy;
+      targetZ = oz;
+    }
+    c.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), blendSpeed);
+
+    c.material.forEach(m => {
+      m.emissive.set(m.color);
+      m.emissiveIntensity = isShow ? 0.8 : m.emissiveIntensity * 0.9;
+    });
+
+    const border = c.userData.border;
+    
+    if (isShow) {
+      border.visible = true;
+      border.material.color.set(0xffffff);
+    } else {
+      border.visible = true; 
+    }
+  });
+}
+
+// 主渲染
 function animate() {
   requestAnimationFrame(animate)
   controls.update()
+  updateShowMode()
   renderer.render(scene, camera)
 }
 
+// 窗口大小
 function handleResize() {
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
@@ -257,71 +338,32 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+.rubiks-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+.cube-canvas { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
 
-.rubiks-container {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
-  overflow: hidden;
-}
-.cube-canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
 .control-panel {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.75);
-  padding: 20px;
-  border-radius: 10px;
-  color: white;
-  z-index: 100;
-  min-width: 380px;
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.75); padding: 20px; border-radius: 10px;
+  color: white; z-index: 100; min-width: 380px;
   box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
-.control-panel h3 {
-  margin-top: 0;
-  text-align: center;
-  color: #fff;
+.control-panel h3 { text-align: center; margin-bottom: 12px; }
+
+.mode-select {
+  margin: 0 0 15px 0; display: flex; gap: 8px; justify-content: center;
 }
 .axis-select, .layer-select, .rotate-btns {
-  margin: 15px 0;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
+  margin: 15px 0; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
 }
+
 button {
-  padding: 7px 14px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  background: #444;
-  color: white;
-  transition: all 0.2s ease;
-  font-size: 14px;
+  padding: 7px 14px; border: none; border-radius: 5px; cursor: pointer;
+  background: #444; color: white; transition: all 0.2s ease; font-size: 14px;
 }
-button:hover {
-  background: #666;
-  transform: translateY(-1px);
-}
-button.active {
-  background: #007bff;
-  font-weight: bold;
-}
-.reset-btn {
-  background: #dc3545;
-  font-weight: bold;
-}
+button:hover { background: #666; transform: translateY(-1px); }
+button.active { background: #007bff; font-weight: bold; }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.reset-btn { background: #dc3545; font-weight: bold; }
 </style>

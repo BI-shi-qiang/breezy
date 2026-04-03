@@ -1,6 +1,6 @@
 <template>
   <div class="navbar-wrapper" :class="{ hidden: navHidden }" ref="wrapperRef">
-    <audio ref="audio">
+    <audio ref="audio" autoplay loop>
       <source src="/breezy/bg-music.ogg" type="audio/ogg" />
     </audio>
 
@@ -113,13 +113,32 @@
           <img src="@/assets/xitujuejin.png" class="icon-img" /> 掘金
         </a>
         
-        <!-- ✅ 移动端音乐按钮 -->
+        <!-- 音乐控制按钮 -->
         <a href="javascript:;" class="mobile-link mobile-btn btn-outline" @click.prevent="toggleMusic">
-          {{ isMusicPlaying ? '🔇 关闭音乐' : '🎵 打开音乐' }}
+          <img 
+            v-if="isMusicPlaying" 
+            src="@/assets/music-on.png" 
+            class="icon-img" 
+          />
+          <img 
+            v-else 
+            src="@/assets/music-off.png" 
+            class="icon-img" 
+          />
         </a>
 
+        <!-- 主题切换按钮 -->
         <a href="javascript:;" class="mobile-link mobile-btn btn-outline" @click.prevent="toggleTheme">
-          {{ isDark ? '☀️ 切换浅色' : '🌙 切换深色' }}
+          <img 
+            v-if="isDark" 
+            src="@/assets/sun.png" 
+            class="icon-img" 
+          />
+          <img 
+            v-else 
+            src="@/assets/moon.png" 
+            class="icon-img" 
+          />
         </a>
       </div>
     </nav>
@@ -139,6 +158,7 @@ const mobileMenuOpen = ref(false)
 const navHidden = ref(true)
 const isSwinging = ref(false)
 const wrapperRef = ref(null)
+const firstTab = ref(0)
 
 const isMusicPlaying = ref(false)
 const audio = ref()
@@ -180,9 +200,10 @@ const closeMobileMenu = () => {
 }
 
 const toggleNavbar = () => {
-  if (!isMusicPlaying.value) {
-    plays()
+  if (!isMusicPlaying.value && firstTab.value === 0) {
     isMusicPlaying.value = true
+    plays()
+    firstTab.value = 1
   }
   navHidden.value = !navHidden.value
   isSwinging.value = true
@@ -227,7 +248,7 @@ onUnmounted(() => {
 }
 
 :global(.theme-light) .navbar {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.5);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 

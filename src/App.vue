@@ -109,7 +109,7 @@ onUnmounted(() => {
   background: #000;
 }
 .theme-light {
-  background: #fff;
+  background: #faf7f0;
 }
 
 .wrapper {
@@ -130,15 +130,15 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  color: #fff;
+  color: #faf7f0;
 }
 .theme-light .page-content {
   color: #000;
-  background: #fff;
+  background: #faf7f0;
 }
 .theme-dark .page-content {
   background: #000;
-  color: #fff;
+  color: #faf7f0;
 }
 
 /* 卡片 */
