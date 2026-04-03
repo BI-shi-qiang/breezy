@@ -1,7 +1,7 @@
 <template>
   <div class="rubiks-container">
     <div class="control-panel">
-      <h3>3D魔方控制器</h3>
+      <h3>解腻小魔方</h3>
       <div class="axis-select">
         <label>选择轴：</label>
         <button 

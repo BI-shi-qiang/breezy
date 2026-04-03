@@ -14,14 +14,7 @@
       </div>
       <div class="page">
         <div class="page-content">
-          <div class="card-list">
-            <!-- 卡片1 -->
-            <FlipCard
-              :imgSrc="card1"
-              title="Cycle"
-              text="A cycle of my life, my hobby is cycle."
-            />
-          </div>
+          <HangingTagCard />
         </div>
       </div>
       <div class="page">
@@ -36,9 +29,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import TabVue from "./components/TabVue/index.vue";
-import FlipCard from "./components/FlipCard/index.vue";
 import MagicCube from "./components/MagicCube/index.vue";
-import card1 from '@/assets/card1.jpg'
+import HangingTagCard from "./components/HangingTagCard/index.vue";
 
 const isDark = ref(true);
 function onThemeChange(val) {
@@ -125,11 +117,10 @@ onUnmounted(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  margin-top: 80px;
 }
 .page {
   width: 100%;
-  height: calc(100vh - 80px);
+  height: 100%;
   flex-shrink: 0;
 }
 .page-content {

@@ -1,86 +1,134 @@
 <template>
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="#" class="nav-brand">Breezy</a>
-      <div class="nav-menu">
-        <a href="https://github.com/BI-shi-qiang" target="_blank" class="nav-link platform-link">
-          <img src="@/assets/github.png" class="icon-img" />
-        </a>
-        <a href="https://gitee.com/bi-shiqiang" target="_blank" class="nav-link platform-link">
-          <img src="@/assets/gitee.png" class="icon-img" />
-        </a>
-        <a href="https://blog.csdn.net/2401_82352441?type=blog" target="_blank" class="nav-link platform-link">
-          <img src="@/assets/csdn.png" class="icon-img" />
-        </a>
-        <a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="nav-link platform-link">
-          <img src="@/assets/tiktok.png" class="icon-img" />
-        </a>
-        <a href="https://space.bilibili.com/1425205072" target="_blank" class="nav-link platform-link">
-          <img src="@/assets/bilibili.png" class="icon-img" />
-        </a>
-        <a href="https://www.xiaohongshu.com/user/profile/6487299d0000000011000c51" target="_blank" class="nav-link platform-link">
-          <img src="@/assets/xiaohongshu.png" class="icon-img" />
-        </a>
-        <a href="https://www.douban.com/people/253295904/?_i=5057236mjxrVP7,5057247mjxrVP7" target="_blank" class="nav-link platform-link">
-          <img src="@/assets/douban.png" class="icon-img" />
-        </a>
-        <a href="https://www.facebook.com/" target="_blank" class="nav-link platform-link">
-          <img src="@/assets/facebook.png" class="icon-img" />
-        </a>
-        <a href="https://twitter.com/" target="_blank" class="nav-link platform-link">
-          <img src="@/assets/twitter.png" class="icon-img" />
-        </a>
-        <a href="https://juejin.cn/user/1963060424624064" target="_blank" class="nav-link platform-link">
-          <img src="@/assets/xitujuejin.png" class="icon-img" />
-        </a>
-        <!-- 统一样式的镂空按钮 -->
-        <a href="#" class="nav-link btn-outline">RESUME</a>
-        <button class="nav-link btn-outline" @click="toggleTheme">
-          {{ isDark ? '☀️ 浅色' : '🌙 深色' }}
+  <div class="navbar-wrapper" :class="{ hidden: navHidden }" ref="wrapperRef">
+    <audio ref="audio">
+      <source src="/breezy/bg-music.ogg" type="audio/ogg" />
+    </audio>
+
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="#" class="nav-brand">Breezy</a>
+        <div class="nav-menu">
+          <a href="https://github.com/BI-shi-qiang" target="_blank" class="nav-link platform-link">
+            <img src="@/assets/github.png" class="icon-img" />
+          </a>
+          <a href="https://gitee.com/bi-shiqiang" target="_blank" class="nav-link platform-link">
+            <img src="@/assets/gitee.png" class="icon-img" />
+          </a>
+          <a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="nav-link platform-link">
+            <img src="@/assets/tiktok.png" class="icon-img" />
+          </a>
+          <a href="https://blog.csdn.net/240182352441?type=blog" target="_blank" class="nav-link platform-link">
+            <img src="@/assets/csdn.png" class="icon-img" />
+          </a>
+          <a href="https://www.xiaohongshu.com/user/profile/6487299d0000000011000c51" target="_blank" class="nav-link platform-link">
+            <img src="@/assets/xiaohongshu.png" class="icon-img" />
+          </a>
+          <a href="https://www.douban.com/people/253295904/?_i=5057236mjxrVP7,5057236mjxrVP7" target="_blank" class="nav-link platform-link">
+            <img src="@/assets/douban.png" class="icon-img" />
+          </a>
+          <a href="https://space.bilibili.com/1425205072" target="_blank" class="nav-link platform-link">
+            <img src="@/assets/bilibili.png" class="icon-img" />
+          </a>
+          <a href="https://www.facebook.com/" target="_blank" class="nav-link platform-link">
+            <img src="@/assets/facebook.png" class="icon-img" />
+          </a>
+          <a href="https://twitter.com/" target="_blank" class="nav-link platform-link">
+            <img src="@/assets/twitter.png" class="icon-img" />
+          </a>
+          <a href="https://juejin.cn/user/1963060424624064" target="_blank" class="nav-link platform-link">
+            <img src="@/assets/xitujuejin.png" class="icon-img" />
+          </a>
+          
+          <!-- 背景音乐按钮 -->
+          <button class="nav-link icon-btn" @click="toggleMusic">
+            <img
+              v-if="isMusicPlaying"
+              src="@/assets/music-on.png"
+              class="icon-img"
+            />
+            <img
+              v-else
+              src="@/assets/music-off.png"
+              class="icon-img"
+            />
+          </button>
+
+          <!-- 主题切换按钮 -->
+          <button class="nav-link icon-btn" @click="toggleTheme">
+            <img
+              v-if="isDark"
+              src="@/assets/sun.png"
+              class="icon-img"
+            />
+            <img
+              v-else
+              src="@/assets/moon.png"
+              class="icon-img"
+            />
+          </button>
+        </div>
+        <button class="mobile-menu-btn" @click.stop="toggleMobileMenu">
+          <img 
+            v-if="mobileMenuOpen" 
+            src="@/assets/close.png" 
+            class="icon-img" 
+          />
+          <img 
+            v-else 
+            src="@/assets/menu.png" 
+            class="icon-img" 
+          />
         </button>
       </div>
-      <button class="mobile-menu-btn" @click="toggleMobileMenu">☰</button>
-    </div>
-    <div class="mobile-menu" :class="{ active: mobileMenuOpen }">
 
-      <a href="https://github.com/BI-shi-qiang" target="_blank" class="mobile-link">
-        <img src="@/assets/github.png" class="icon-img" /> GitHub
-      </a>
-      <a href="https://gitee.com/bi-shiqiang" target="_blank" class="mobile-link">
-        <img src="@/assets/gitee.png" class="icon-img" /> Gitee
-      </a>
-      <a href="https://blog.csdn.net/2401_82352441?type=blog" target="_blank" class="mobile-link">
-        <img src="@/assets/csdn.png" class="icon-img" /> CSDN
-      </a>
-      <a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="mobile-link">
-        <img src="@/assets/tiktok.png" class="icon-img" /> 抖音
-      </a>
-      <a href="https://space.bilibili.com/1425205072" target="_blank" class="mobile-link">
-        <img src="@/assets/bilibili.png" class="icon-img" /> BiliBili
-      </a>
-      <a href="https://www.xiaohongshu.com/user/profile/6487299d0000000011000c51" target="_blank" class="mobile-link">
-        <img src="@/assets/xiaohongshu.png" class="icon-img" /> 小红书
-      </a>
-      <a href="https://www.douban.com/people/253295904/?_i=5057236mjxrVP7,5057247mjxrVP7" target="_blank" class="mobile-link">
-        <img src="@/assets/douban.png" class="icon-img" /> 豆瓣
-      </a>
-      <a href="https://www.facebook.com/" target="_blank" class="mobile-link">
-        <img src="@/assets/facebook.png" class="icon-img" /> Facebook
-      </a>
-      <a href="https://twitter.com/" target="_blank" class="mobile-link">
-        <img src="@/assets/twitter.png" class="icon-img" /> Twitter
-      </a>
-      <a href="https://juejin.cn/user/1963060424624064" target="_blank" class="mobile-link">
-        <img src="@/assets/xitujuejin.png" class="icon-img" /> 掘金
-      </a>
-    
-      <a href="#" class="mobile-link mobile-btn btn-outline">RESUME</a>
-      <!-- 把 button 改成 a 标签，完全统一 -->
-      <a href="javascript:;" class="mobile-link mobile-btn btn-outline" @click.prevent="toggleTheme">
-        {{ isDark ? '☀️ 切换浅色' : '🌙 切换深色' }}
-      </a>
+      <div class="mobile-menu" :class="{ active: mobileMenuOpen }">
+        <a href="https://github.com/BI-shi-qiang" target="_blank" class="mobile-link">
+          <img src="@/assets/github.png" class="icon-img" /> GitHub
+        </a>
+        <a href="https://gitee.com/bi-shiqiang" target="_blank" class="mobile-link">
+          <img src="@/assets/gitee.png" class="icon-img" /> Gitee
+        </a>
+        <a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="mobile-link">
+          <img src="@/assets/tiktok.png" class="icon-img" /> 抖音
+        </a>
+        <a href="https://blog.csdn.net/240182352441?type=blog" target="_blank" class="mobile-link">
+          <img src="@/assets/csdn.png" class="icon-img" /> CSDN
+        </a>
+        <a href="https://www.xiaohongshu.com/user/profile/6487299d0000000011000c51" target="_blank" class="mobile-link">
+          <img src="@/assets/xiaohongshu.png" class="icon-img" /> 小红书
+        </a>
+        <a href="https://www.douban.com/people/253295904/?_i=5057236mjxrVP7,5057236mjxrVP7" target="_blank" class="mobile-link">
+          <img src="@/assets/douban.png" class="icon-img" /> 豆瓣
+        </a>
+        <a href="https://space.bilibili.com/1425205072" target="_blank" class="mobile-link">
+          <img src="@/assets/bilibili.png" class="icon-img" /> BiliBili
+        </a>
+        <a href="https://www.facebook.com/" target="_blank" class="mobile-link">
+          <img src="@/assets/facebook.png" class="icon-img" /> Facebook
+        </a>
+        <a href="https://twitter.com/" target="_blank" class="mobile-link">
+          <img src="@/assets/twitter.png" class="icon-img" /> Twitter
+        </a>
+        <a href="https://juejin.cn/user/1963060424624064" target="_blank" class="mobile-link">
+          <img src="@/assets/xitujuejin.png" class="icon-img" /> 掘金
+        </a>
+        
+        <!-- ✅ 移动端音乐按钮 -->
+        <a href="javascript:;" class="mobile-link mobile-btn btn-outline" @click.prevent="toggleMusic">
+          {{ isMusicPlaying ? '🔇 关闭音乐' : '🎵 打开音乐' }}
+        </a>
+
+        <a href="javascript:;" class="mobile-link mobile-btn btn-outline" @click.prevent="toggleTheme">
+          {{ isDark ? '☀️ 切换浅色' : '🌙 切换深色' }}
+        </a>
+      </div>
+    </nav>
+
+    <div class="rope-container" @click="toggleNavbar" :class="{ swinging: isSwinging }">
+      <div class="rope"></div>
+      <div class="rope-puller"></div>
     </div>
-  </nav>
+  </div>
 </template>
 
 <script setup>
@@ -88,8 +136,30 @@ import { ref, onMounted, onUnmounted } from 'vue'
 
 const isDark = ref(true)
 const mobileMenuOpen = ref(false)
+const navHidden = ref(true)
+const isSwinging = ref(false)
+const wrapperRef = ref(null)
 
-// 定义 emit：主题切换 + 翻页锁定
+const isMusicPlaying = ref(false)
+const audio = ref()
+const plays = () => {
+  if (audio.value) {
+    audio.value.play()
+  }
+}
+const toggleMusic = () => {
+  if (!audio.value) return
+  if (isMusicPlaying.value) {
+    audio.value.pause()
+    isMusicPlaying.value = false
+  } else {
+    audio.value.play().catch(err => {
+      console.log('播放被限制', err)
+    })
+    isMusicPlaying.value = true
+  }
+}
+
 const emit = defineEmits(['theme-change', 'page-lock'])
 
 const toggleTheme = () => {
@@ -97,18 +167,28 @@ const toggleTheme = () => {
   emit('theme-change', isDark.value)
 }
 
-// 菜单开关 → 发送锁定状态
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
-  emit('page-lock', mobileMenuOpen.value) // 关键代码
+  emit('page-lock', mobileMenuOpen.value)
 }
 
-// 关闭菜单
 const closeMobileMenu = () => {
   if (mobileMenuOpen.value) {
     mobileMenuOpen.value = false
     emit('page-lock', false)
   }
+}
+
+const toggleNavbar = () => {
+  if (!isMusicPlaying.value) {
+    plays()
+    isMusicPlaying.value = true
+  }
+  navHidden.value = !navHidden.value
+  isSwinging.value = true
+  setTimeout(() => {
+    isSwinging.value = false
+  }, 800)
 }
 
 onMounted(() => {
@@ -119,17 +199,26 @@ onMounted(() => {
 
 onUnmounted(() => {
   closeMobileMenu()
+  if (audio.value) {
+    audio.value.pause()
+  }
 })
 </script>
 
 <style scoped>
-/* 导航栏 */
-.navbar {
+.navbar-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 9999;
+  transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.navbar-wrapper.hidden {
+  transform: translateY(-100%);
+}
+
+.navbar {
   padding: 1rem 0;
   transition: all 0.3s ease;
   background: rgba(0, 0, 0, 0.8);
@@ -142,28 +231,26 @@ onUnmounted(() => {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* 容器 */
 .nav-container {
   max-width: 1920px;
   margin: 0 auto;
   padding: 0 2rem;
+  margin-right: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* LOGO */
 .nav-brand {
   font-size: 1.5rem;
   font-weight: 700;
   text-decoration: none;
-  color: #fff;
+  color: #ffffff;
 }
 :global(.theme-light) .nav-brand {
   color: #000;
 }
 
-/* 导航菜单 */
 .nav-menu {
   display: flex;
   align-items: center;
@@ -171,7 +258,6 @@ onUnmounted(() => {
   flex-wrap: wrap;
 }
 
-/* 链接样式 */
 .nav-link {
   font-size: 1rem;
   font-weight: 500;
@@ -191,14 +277,18 @@ onUnmounted(() => {
   color: #000;
 }
 
-/* 图片图标 */
 .icon-img {
   width: 30px;
   height: 30px;
   object-fit: contain;
 }
 
-/* 镂空按钮 */
+.icon-btn {
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
 .btn-outline {
   padding: 0.5rem 1.2rem;
   border-radius: 0px;
@@ -225,19 +315,33 @@ onUnmounted(() => {
   background: rgba(0, 0, 0, 0.05);
 }
 
-/* 移动端按钮 */
 .mobile-menu-btn {
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
   display: none;
-  background: transparent;
-  border: none;
-  font-size: 1.8rem;
-  color: #fff;
+  transition: transform 0.3s ease;
 }
+.mobile-menu-btn img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+/* 打开时旋转动画 */
+.mobile-menu-btn.active {
+  transform: rotate(90deg);
+}
+
+@media (max-width: 992px) {
+  .mobile-menu-btn {
+    display: block;
+  }
+}
+
 :global(.theme-light) .mobile-menu-btn {
   color: #000;
 }
 
-/* 移动端菜单 */
 .mobile-menu {
   display: none;
   position: absolute;
@@ -277,7 +381,6 @@ onUnmounted(() => {
   height: 18px;
 }
 
-/* 移动端按钮强制统一大小 */
 .mobile-btn {
   width: 100%;
   margin: 0.5rem 0;
@@ -288,6 +391,58 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+}
+
+.rope-container {
+  position: fixed;
+  top: 0;
+  right: 40px;
+  width: 2px;
+  z-index: 9998;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+}
+
+.rope-container.swinging {
+  animation: ropeSwing 0.8s ease-in-out;
+}
+
+@keyframes ropeSwing {
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(8deg); }
+  40%  { transform: rotate(-6deg); }
+  60%  { transform: rotate(3deg); }
+  80%  { transform: rotate(-2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.rope {
+  width: 2px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.4);
+  transition: height 0.4s ease;
+}
+:global(.theme-light) .rope {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.rope-puller {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease;
+}
+:global(.theme-light) .rope-puller {
+  background: #000;
+}
+
+.rope-container:active .rope-puller {
+  transform: scale(0.8);
 }
 
 @media (max-width: 992px) {
