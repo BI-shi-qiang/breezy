@@ -17,7 +17,7 @@
           <a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="nav-link platform-link">
             <img src="@/assets/tiktok.png" class="icon-img" />
           </a>
-          <a href="https://blog.csdn.net/240182352441?type=blog" target="_blank" class="nav-link platform-link">
+          <a href="https://blog.csdn.net/2401_82352441?ops_request_misc=%7B%22request%5Fid%22%3A%221faa12bc8c8ea0335bdcf3309ea5b353%22%2C%22scm%22%3A%2220140713.130064515..%22%7D&request_id=1faa12bc8c8ea0335bdcf3309ea5b353&biz_id=206&utm_medium=distribute.pc_search_result.none-task-user-null-1-169420311-null-null.nonecase&utm_term=%E7%AA%9D%E5%AD%90%E9%9D%A2&spm=1018.2226.3001.4351" target="_blank" class="nav-link platform-link">
             <img src="@/assets/csdn.png" class="icon-img" />
           </a>
           <a href="https://www.xiaohongshu.com/user/profile/6487299d0000000011000c51" target="_blank" class="nav-link platform-link">
@@ -91,7 +91,7 @@
         <a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="mobile-link">
           <img src="@/assets/tiktok.png" class="icon-img" /> 抖音
         </a>
-        <a href="https://blog.csdn.net/240182352441?type=blog" target="_blank" class="mobile-link">
+        <a href="https://blog.csdn.net/2401_82352441?ops_request_misc=%7B%22request%5Fid%22%3A%221faa12bc8c8ea0335bdcf3309ea5b353%22%2C%22scm%22%3A%2220140713.130064515..%22%7D&request_id=1faa12bc8c8ea0335bdcf3309ea5b353&biz_id=206&utm_medium=distribute.pc_search_result.none-task-user-null-1-169420311-null-null.nonecase&utm_term=%E7%AA%9D%E5%AD%90%E9%9D%A2&spm=1018.2226.3001.4351" target="_blank" class="mobile-link">
           <img src="@/assets/csdn.png" class="icon-img" /> CSDN
         </a>
         <a href="https://www.xiaohongshu.com/user/profile/6487299d0000000011000c51" target="_blank" class="mobile-link">
