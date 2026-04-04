@@ -47,6 +47,14 @@
         <button @click="rotateLayer(false)" :disabled="mode === 'show'">逆时针旋转 90°</button>
         <button class="reset-btn" @click="resetCube" :disabled="mode === 'show'">重置魔方</button>
       </div>
+      <div class="lock-btn-container">
+        <button 
+          class="lock-btn" 
+          @click="togglePageLock"
+        >
+          {{ pageLocked ? "已锁定滚动" : "允许滚动" }}
+        </button>
+      </div>
     </div>
     <canvas ref="canvasContainer" class="cube-canvas"></canvas>
   </div>
@@ -58,12 +66,14 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 // 👇 接收父组件传过来的主题
-const { isDark } = defineProps({
+const { isDark, pageLocked } = defineProps({
   isDark: {
     type: Boolean,
     default: true
-  }
+  },
+  pageLocked: { type: Boolean, default: false }
 })
+const emit = defineEmits(['toggle-page-lock'])
 
 const canvasContainer = ref(null)
 
@@ -316,6 +326,11 @@ function updateShowMode() {
   });
 }
 
+// 锁定/解锁滚动
+function togglePageLock() {
+  emit('toggle-page-lock', !pageLocked)
+}
+
 // 主渲染
 function animate() {
   requestAnimationFrame(animate)
@@ -376,6 +391,22 @@ onUnmounted(() => {
 }
 .axis-select, .layer-select, .rotate-btns {
   margin: 15px 0; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+
+.lock-btn-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+.lock-btn {
+  padding: 8px 16px;
+  background: #17a2b8 !important;
+  color: #fff !important;
+  font-weight: bold;
+  width: 100%;
+}
+.lock-btn:hover {
+  background: #138496 !important;
 }
 
 /* 按钮深色 */

@@ -45,7 +45,7 @@
           <a href="https://juejin.cn/user/1963060424624064" target="_blank" class="nav-link platform-link">
             <img src="@/assets/xitujuejin.png" class="icon-img" />
           </a>
-          
+          <ScreenFull />
           <button class="nav-link icon-btn" @click="toggleMusic">
             <img
               v-if="isMusicPlaying"
@@ -117,7 +117,7 @@
         <a href="https://juejin.cn/user/1963060424624064" target="_blank" class="mobile-link">
           <img src="@/assets/xitujuejin.png" class="icon-img" /> 掘金
         </a>
-        
+        <ScreenFull class="mobile-link mobile-btn btn-outline"/>
         <a href="javascript:;" class="mobile-link mobile-btn btn-outline" @click.prevent="toggleMusic">
           <img 
             v-if="isMusicPlaying" 
@@ -155,6 +155,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, defineProps, defineEmits } from 'vue'
+import ScreenFull from '@/components/ScreenFull/index.vue'
 
 // 接收父组件主题
 const props = defineProps({

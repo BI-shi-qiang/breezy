@@ -19,7 +19,7 @@
       </div>
       <div class="page">
         <div class="page-content">
-          <MagicCube :isDark="isDark" />
+          <MagicCube :isDark="isDark" :pageLocked="pageLocked" @toggle-page-lock="handlePageLock" />
         </div>
       </div>
     </div>
