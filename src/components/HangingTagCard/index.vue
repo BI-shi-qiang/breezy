@@ -1,12 +1,9 @@
 <template>
   <div class="page-container">
-    <!-- 吊牌卡片主体 -->
     <section class="hanging-tag-card" :class="{ 'dark-theme': isDark }">
-      <!-- 顶部悬挂绳 -->
       <div class="hanger-rod"></div>
 
       <div class="card-content">
-        <!-- 左侧：个人介绍 -->
         <div class="intro-section">
           <p class="badge">FRONTEND DEVELOPER</p>
           <h1 class="title">
@@ -17,11 +14,10 @@
             Hi, I'm Bi Shiqiang, a front-end web developer based in China. As a student with a deep passion for coding, I enjoy turning ideas into clean, interactive websites. Outside of development, I love sports like table tennis, running, and cycling. I am committed to growing and improving in this field every day.
           </p>
           <a href="https://github.com/BI-shi-qiang" target="_blank" class="github-link">
-            <span class="github-icon">⚫</span> https://github.com/BI-shi-qiang
+            <img src="@/assets/github.png" class="icon-img" /> https://github.com/BI-shi-qiang
           </a>
         </div>
 
-        <!-- 右侧：头像 & 信息 -->
         <div class="sidebar-section">
           <div class="avatar-frame">
             <img 
@@ -41,15 +37,12 @@
           <div class="skills-section">
             <h3 class="skills-title">SKILLS</h3>
             <ul class="skills-list">
-              <!-- <li>React Three Fiber</li> -->
+              <li>HTML</li>
+              <li>CSS</li>
+              <li>Javascript</li>
+              <li>Vue.js</li>
               <li>Three.js</li>
               <li>Blender</li>
-              <!-- <li>React.js</li> -->
-              <!-- <li>React Native</li> -->
-              <li>Vue.js</li>
-              <li>CSS</li>
-              <li>HTML</li>
-              <li>Javascript</li>
               <li>Typescript</li>
             </ul>
           </div>
@@ -60,9 +53,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-
-// 如果你之前的导航栏有深色模式状态，这里可以接收 props
 const props = defineProps({
   isDark: {
     type: Boolean,
@@ -72,21 +62,20 @@ const props = defineProps({
 </script>
 
 <style scoped>
-/* 全局容器，用于居中展示 */
 .page-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #2c2c2c; /* 深灰色背景衬托吊牌 */
   padding: 2rem;
   box-sizing: border-box;
 }
 
-/* 核心：吊牌卡片样式 */
+/* 基础吊牌卡片（亮色模式） */
 .hanging-tag-card {
   --paper-bg: #f9f2e6;
   --shadow-color: rgba(0, 0, 0, 0.4);
+  --glow-color: transparent;
   position: relative;
   width: 100%;
   max-width: 1200px;
@@ -94,23 +83,37 @@ const props = defineProps({
   background: var(--paper-bg);
   filter: blur(0.2px) grayscale(2%);
   opacity: 0.95;
-  
-  /* 2. 吊牌悬挂效果 */
   transform: rotate(-1deg);
   box-shadow: 
     0 5px 15px var(--shadow-color),
+    0 0 0 2px var(--glow-color),
     0 0 30px rgba(0,0,0,0.1) inset;
   border-radius: 4px;
+  transition: all 0.5s ease;
 }
 
-/* 深色模式适配 */
-.dark-theme .hanging-tag-card {
-  --paper-bg: #2d2a24;
-  --shadow-color: rgba(0, 0, 0, 0.6);
+/* 🌟 深色模式 → 科技感 + 发光边框 */
+.hanging-tag-card.dark-theme {
+  --paper-bg: #111827;
+  --shadow-color: rgba(0,0,0,0.8);
+  --glow-color: #00aaff;
+  transform: rotate(0deg);
+  background: #0f172a;
+  border: 2px solid #1e293b;
+  box-shadow: 
+    0 0 25px #00aaff66,
+    0 0 60px #00aaff33,
+    0 0 100px #00aaff11,
+    0 0 0 2px var(--glow-color);
   color: #e0e0e0;
 }
 
-/* 顶部悬挂杆 */
+/* 🌟 深色模式 → 隐藏吊绳 */
+.dark-theme .hanger-rod {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .hanger-rod {
   position: absolute;
   top: -15px;
@@ -122,6 +125,7 @@ const props = defineProps({
   border-radius: 4px 4px 0 0;
   z-index: 1;
   box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
+  transition: all 0.4s ease;
 }
 
 .hanger-rod::after {
@@ -136,7 +140,6 @@ const props = defineProps({
   border-radius: 2px;
 }
 
-/* 卡片内容布局 */
 .card-content {
   display: flex;
   padding: 40px 30px;
@@ -144,7 +147,6 @@ const props = defineProps({
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* 左侧介绍区 */
 .intro-section {
   flex: 1;
   display: flex;
@@ -157,6 +159,10 @@ const props = defineProps({
   font-weight: bold;
   letter-spacing: 1px;
   margin: 0;
+  color: #d32f2f;
+}
+.dark-theme .badge {
+  color: #00aaff;
 }
 
 .title {
@@ -167,18 +173,20 @@ const props = defineProps({
 }
 
 .intro-text {
-  font-family: 'Brush Script MT', cursive; /* 保留手写体风格，系统无 */
+  font-family: 'Brush Script MT', cursive;
   color: #d32f2f;
   font-weight: 500;
+}
+.dark-theme .intro-text {
+  color: #00aaff;
 }
 
 .about-me {
   display: block;
   color: #333;
 }
-
 .dark-theme .about-me {
-  color: #fff;
+  color: #ffffff;
 }
 
 .description {
@@ -187,11 +195,14 @@ const props = defineProps({
   color: #444;
   margin: 10px 0;
 }
-
 .dark-theme .description {
-  color: #ccc;
+  color: #cbd5e1;
 }
-
+.icon-img {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}
 .github-link {
   display: inline-flex;
   align-items: center;
@@ -201,16 +212,14 @@ const props = defineProps({
   font-weight: 500;
   margin-top: 10px;
 }
-
 .dark-theme .github-link {
-  color: #fff;
+  color: #00aaff;
 }
 
 .github-link:hover {
   text-decoration: underline;
 }
 
-/* 右侧边栏 */
 .sidebar-section {
   width: 320px;
   display: flex;
@@ -219,7 +228,6 @@ const props = defineProps({
   gap: 20px;
 }
 
-/* 头像相框 */
 .avatar-frame {
   width: 280px;
   height: 380px;
@@ -227,6 +235,11 @@ const props = defineProps({
   border-radius: 4px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: all 0.4s ease;
+}
+.dark-theme .avatar-frame {
+  border-color: #00aaff;
+  box-shadow: 0 0 20px #00aaff55;
 }
 
 .avatar-img {
@@ -236,7 +249,6 @@ const props = defineProps({
   display: block;
 }
 
-/* 名字与下载 */
 .name {
   font-size: 24px;
   font-weight: bold;
@@ -244,9 +256,8 @@ const props = defineProps({
   margin: 0;
   color: #333;
 }
-
 .dark-theme .name {
-  color: #fff;
+  color: #ffffff;
 }
 
 .resume-btn {
@@ -261,17 +272,19 @@ const props = defineProps({
   font-size: 14px;
   transition: all 0.2s;
 }
-
 .dark-theme .resume-btn {
-  border-color: #fff;
-  color: #fff;
+  border-color: #00aaff;
+  color: #00aaff;
+  background: #1e293b;
 }
 
 .resume-btn:hover {
   background: rgba(0,0,0,0.1);
 }
+.dark-theme .resume-btn:hover {
+  background: #1e40af22;
+}
 
-/* 技能列表 */
 .skills-title {
   font-size: 18px;
   font-weight: bold;
@@ -279,9 +292,8 @@ const props = defineProps({
   color: #333;
   align-self: flex-start;
 }
-
 .dark-theme .skills-title {
-  color: #fff;
+  color: #00aaff;
 }
 
 .skills-list {
@@ -299,12 +311,10 @@ const props = defineProps({
   color: #555;
   padding: 4px 0;
 }
-
 .dark-theme .skills-list li {
-  color: #ddd;
+  color: #cbd5e1;
 }
 
-/* 响应式：移动端适配 */
 @media (max-width: 900px) {
   .card-content {
     flex-direction: column;
@@ -319,7 +329,10 @@ const props = defineProps({
   }
   
   .title {
-    font-size: 36px;
+    font-size: 20px;
+  }
+  .description {
+    margin-top: 0;
   }
 }
 </style>

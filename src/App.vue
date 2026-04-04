@@ -3,23 +3,23 @@
     class="viewport"
     :class="{ 'theme-dark': isDark, 'theme-light': !isDark }"
   >
+    <WebBack v-if="isDark" />
     <!-- 直接使用封装好的导航栏组件 -->
-    <TabVue @theme-change="onThemeChange" @page-lock="handlePageLock" />
-
+    <TabVue @theme-change="onThemeChange" @page-lock="handlePageLock" :isDark="isDark" />
     <div class="wrapper" :style="wrapperStyle">
       <div class="page">
         <div class="page-content">
-          <h1 style="font-size: 40px">Welcome ! My friend</h1>
+          <HomeWelcome :isDark="isDark" />
         </div>
       </div>
       <div class="page">
         <div class="page-content">
-          <HangingTagCard />
+          <HangingTagCard :isDark="isDark" />
         </div>
       </div>
       <div class="page">
         <div class="page-content">
-          <MagicCube />
+          <MagicCube :isDark="isDark" />
         </div>
       </div>
     </div>
@@ -28,9 +28,11 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import WebBack from "./components/WebBack/index.vue";
 import TabVue from "./components/TabVue/index.vue";
 import MagicCube from "./components/MagicCube/index.vue";
 import HangingTagCard from "./components/HangingTagCard/index.vue";
+import HomeWelcome from "./components/HomeWelcome/index.vue";
 
 const isDark = ref(true);
 function onThemeChange(val) {
@@ -117,6 +119,7 @@ onUnmounted(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  z-index: 5;
 }
 .page {
   width: 100%;

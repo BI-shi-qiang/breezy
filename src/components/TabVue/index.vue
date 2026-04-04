@@ -1,5 +1,12 @@
 <template>
-  <div class="navbar-wrapper" :class="{ hidden: navHidden }" ref="wrapperRef">
+  <div
+    class="navbar-wrapper"
+    :class="[
+      { hidden: navHidden },
+      isDark ? 'theme-dark' : 'theme-light'
+    ]"
+    ref="wrapperRef"
+  >
     <audio ref="audio" autoplay loop>
       <source src="/breezy/bg-music.ogg" type="audio/ogg" />
     </audio>
@@ -39,7 +46,6 @@
             <img src="@/assets/xitujuejin.png" class="icon-img" />
           </a>
           
-          <!-- 背景音乐按钮 -->
           <button class="nav-link icon-btn" @click="toggleMusic">
             <img
               v-if="isMusicPlaying"
@@ -53,7 +59,6 @@
             />
           </button>
 
-          <!-- 主题切换按钮 -->
           <button class="nav-link icon-btn" @click="toggleTheme">
             <img
               v-if="isDark"
@@ -113,7 +118,6 @@
           <img src="@/assets/xitujuejin.png" class="icon-img" /> 掘金
         </a>
         
-        <!-- 音乐控制按钮 -->
         <a href="javascript:;" class="mobile-link mobile-btn btn-outline" @click.prevent="toggleMusic">
           <img 
             v-if="isMusicPlaying" 
@@ -127,7 +131,6 @@
           />
         </a>
 
-        <!-- 主题切换按钮 -->
         <a href="javascript:;" class="mobile-link mobile-btn btn-outline" @click.prevent="toggleTheme">
           <img 
             v-if="isDark" 
@@ -151,9 +154,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, defineProps, defineEmits } from 'vue'
 
-const isDark = ref(true)
+// 接收父组件主题
+const props = defineProps({
+  isDark: {
+    type: Boolean,
+    default: true
+  }
+})
+
+const isDark = computed(() => props.isDark)
+
 const mobileMenuOpen = ref(false)
 const navHidden = ref(true)
 const isSwinging = ref(false)
@@ -162,11 +174,13 @@ const firstTab = ref(0)
 
 const isMusicPlaying = ref(false)
 const audio = ref()
+
 const plays = () => {
   if (audio.value) {
     audio.value.play()
   }
 }
+
 const toggleMusic = () => {
   if (!audio.value) return
   if (isMusicPlaying.value) {
@@ -183,8 +197,7 @@ const toggleMusic = () => {
 const emit = defineEmits(['theme-change', 'page-lock'])
 
 const toggleTheme = () => {
-  isDark.value = !isDark.value
-  emit('theme-change', isDark.value)
+  emit('theme-change', !props.isDark)
 }
 
 const toggleMobileMenu = () => {
@@ -239,6 +252,7 @@ onUnmounted(() => {
   transform: translateY(-100%);
 }
 
+/* 深色模式导航栏 */
 .navbar {
   padding: 1rem 0;
   transition: all 0.3s ease;
@@ -247,9 +261,10 @@ onUnmounted(() => {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-:global(.theme-light) .navbar {
-  background: rgba(255, 255, 255, 0.5);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+/* 浅色模式导航栏 */
+.theme-light .navbar {
+  background: rgba(250, 247, 240, 0.9);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .nav-container {
@@ -268,8 +283,8 @@ onUnmounted(() => {
   text-decoration: none;
   color: #ffffff;
 }
-:global(.theme-light) .nav-brand {
-  color: #000;
+.theme-light .nav-brand {
+  color: #222;
 }
 
 .nav-menu {
@@ -294,8 +309,8 @@ onUnmounted(() => {
   transform: scale(1.2);
 }
 
-:global(.theme-light) .nav-link {
-  color: #000;
+.theme-light .nav-link {
+  color: #222;
 }
 
 .icon-img {
@@ -323,16 +338,16 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
 }
-:global(.theme-light) .btn-outline {
+.theme-light .btn-outline {
   border-color: rgba(0, 0, 0, 0.2);
-  color: #000 !important;
+  color: #222 !important;
 }
 
 .btn-outline:hover {
   opacity: 0.8;
   background: rgba(255, 255, 255, 0.1);
 }
-:global(.theme-light) .btn-outline:hover {
+.theme-light .btn-outline:hover {
   background: rgba(0, 0, 0, 0.05);
 }
 
@@ -348,7 +363,6 @@ onUnmounted(() => {
   height: 30px;
   object-fit: contain;
 }
-/* 打开时旋转动画 */
 .mobile-menu-btn.active {
   transform: rotate(90deg);
 }
@@ -359,7 +373,7 @@ onUnmounted(() => {
   }
 }
 
-:global(.theme-light) .mobile-menu-btn {
+.theme-light .mobile-menu-btn {
   color: #000;
 }
 
@@ -374,8 +388,8 @@ onUnmounted(() => {
   overflow: hidden;
   transition: all 0.3s ease;
 }
-:global(.theme-light) .mobile-menu {
-  background: rgba(255,255,255,0.95);
+.theme-light .mobile-menu {
+  background: rgba(250, 247, 240, 0.98);
 }
 .mobile-menu.active {
   max-height: 100vh;
@@ -392,9 +406,9 @@ onUnmounted(() => {
   text-decoration: none;
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
-:global(.theme-light) .mobile-link {
-  color: #000;
-  border-color: rgba(0,0,0,0.1);
+.theme-light .mobile-link {
+  color: #222;
+  border-color: rgba(0,0,0,0.08);
 }
 
 .mobile-link img {
@@ -446,7 +460,7 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.4);
   transition: height 0.4s ease;
 }
-:global(.theme-light) .rope {
+.theme-light .rope {
   background: rgba(0, 0, 0, 0.3);
 }
 
@@ -458,7 +472,7 @@ onUnmounted(() => {
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
   transition: transform 0.2s ease;
 }
-:global(.theme-light) .rope-puller {
+.theme-light .rope-puller {
   background: #000;
 }
 
