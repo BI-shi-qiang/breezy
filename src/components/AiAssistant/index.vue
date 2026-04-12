@@ -118,7 +118,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["toggle-page-lock"]);
 
-const API_BASE = "http://47.236.184.92";
+const API_BASE = "https://api.bsq.asia";
 
 const input = ref("");
 const messages = ref<any[]>([]);
