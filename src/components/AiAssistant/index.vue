@@ -131,7 +131,7 @@ const sessionScrollMap = ref<Record<string, number>>({});
 let es: EventSource | null = null;
 
 // ====================== WebSocket 实时聊天（我帮你加好了） ======================
-const socket = io("https://47.236.184.92");
+const socket = io("https://api.bsq.asia");
 
 onMounted(() => {
   // 监听新消息推送 → 自动刷新
