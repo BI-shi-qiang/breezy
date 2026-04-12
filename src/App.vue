@@ -23,6 +23,7 @@
         </div>
       </div>
     </div>
+    <AiAssistant :pageLocked="pageLocked" @toggle-page-lock="handlePageLock" />
   </div>
 </template>
 
@@ -33,6 +34,7 @@ import TabVue from "./components/TabVue/index.vue";
 import MagicCube from "./components/MagicCube/index.vue";
 import HangingTagCard from "./components/HangingTagCard/index.vue";
 import HomeWelcome from "./components/HomeWelcome/index.vue";
+import AiAssistant from "./components/AiAssistant/index.vue";
 
 const isDark = ref(true);
 function onThemeChange(val) {
@@ -68,6 +70,7 @@ const change = (dir) => {
 };
 
 const wheel = (e) => {
+  if (pageLocked.value) return;
   e.preventDefault();
   change(e.deltaY > 0 ? "up" : "down");
 };
