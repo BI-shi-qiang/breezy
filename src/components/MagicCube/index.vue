@@ -7,6 +7,7 @@
         <button
           :class="mode === 'game' ? 'active' : ''"
           @click="switchMode('game')"
+
         >
           游戏模式
         </button>
@@ -43,8 +44,8 @@
         </button>
       </div>
       <div class="rotate-btns">
-        <button @click="rotateLayer(true)" :disabled="mode === 'show'">顺时针旋转 90°</button>
-        <button @click="rotateLayer(false)" :disabled="mode === 'show'">逆时针旋转 90°</button>
+        <button @click="rotateLayer(true);setAngle(0)"  :disabled="mode === 'show' ">顺时针旋转 90°</button>
+        <button @click="rotateLayer(false);setAngle(90)" :disabled="mode === 'show'">逆时针旋转 90°</button>
         <button class="reset-btn" @click="resetCube" :disabled="mode === 'show'">重置魔方</button>
       </div>
       <div class="lock-btn-container">
@@ -65,12 +66,12 @@ import { ref, onMounted, onUnmounted, watch, defineProps } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-// 👇 接收父组件传过来的主题
+const setAngle = async (angle) => {
+  await fetch("http://192.168.194.130/set?angle=" + angle).catch(() => {});
+};
+
 const { isDark, pageLocked } = defineProps({
-  isDark: {
-    type: Boolean,
-    default: true
-  },
+  isDark: { type: Boolean, default: true },
   pageLocked: { type: Boolean, default: false }
 })
 const emit = defineEmits(['toggle-page-lock'])
@@ -85,21 +86,14 @@ let isRotating = false
 const activeAxis = ref('y')
 const activeLayer = ref(0)
 const mode = ref('show')
-const autoRotateSpeed = 0.003
-const blendSpeed = 0.1
 
 const COLORS = {
   U: 0xFFFFFF, D: 0xFFFF00, F: 0xFF0000,
   B: 0xFFA500, L: 0x0000FF, R: 0x00FF00
-};
+}
 
-const worldPos = new THREE.Vector3()
-
-// 初始化场景
 function initScene() {
   scene = new THREE.Scene()
-  
-  // 👇 初始化根据主题设置背景色
   scene.background = new THREE.Color(isDark ? 0x000000 : 0xfaf7f0)
 
   camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -121,62 +115,60 @@ function initScene() {
   controls.dampingFactor = 0.05
   controls.minDistance = 5
   controls.maxDistance = 12
-  controls.enableZoom = false // 禁止缩放
+  controls.enableZoom = false
   
   scene.add(cubeGroup)
 }
 
-// 👇 监听主题切换 → 实时改变魔方背景（修复版）
 watch(() => isDark, (val) => {
-  if (scene) {
-    scene.background = new THREE.Color(val ? 0x000000 : 0xfaf7f0)
-  }
+  if (scene) scene.background = new THREE.Color(val ? 0x000000 : 0xfaf7f0)
 })
 
-// 创建小方块
 function createCubie(x, y, z) {
   const size = 0.95
-  const geometry = new THREE.BoxGeometry(size, size, size)
-  
-  const materials = [
-    new THREE.MeshLambertMaterial({ color: COLORS.R }),
-    new THREE.MeshLambertMaterial({ color: COLORS.L }),
-    new THREE.MeshLambertMaterial({ color: COLORS.U }),
-    new THREE.MeshLambertMaterial({ color: COLORS.D }),
-    new THREE.MeshLambertMaterial({ color: COLORS.F }),
-    new THREE.MeshLambertMaterial({ color: COLORS.B })
+  const geo = new THREE.BoxGeometry(size, size, size)
+  const black = new THREE.MeshLambertMaterial({ color: 0x111111 })
+
+  const mats = [
+    black.clone(), black.clone(),
+    black.clone(), black.clone(),
+    black.clone(), black.clone()
   ]
-  
-  const cube = new THREE.Mesh(geometry, materials)
-  cube.position.set(x, y, z)
-  cube.userData.originalPos = new THREE.Vector3(x, y, z)
-  cube.userData.isHighlighted = false
-  
-  const edges = new THREE.EdgesGeometry(geometry)
-  const border = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffff00 }))
-  border.visible = false
-  cube.add(border)
-  cube.userData.border = border
-  
-  return cube
+
+  if (x === 1) mats[0].color.setHex(COLORS.R)
+  if (x === -1) mats[1].color.setHex(COLORS.L)
+  if (y === 1) mats[2].color.setHex(COLORS.U)
+  if (y === -1) mats[3].color.setHex(COLORS.D)
+  if (z === 1) mats[4].color.setHex(COLORS.F)
+  if (z === -1) mats[5].color.setHex(COLORS.B)
+
+  const mesh = new THREE.Mesh(geo, mats)
+  mesh.position.set(x, y, z)
+  mesh.userData.coord = { x, y, z }
+
+  const edges = new THREE.EdgesGeometry(geo)
+  const border = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }))
+  mesh.add(border)
+  mesh.userData.border = border
+
+  return mesh
 }
 
-// 初始化魔方
 function initRubiksCube() {
+  cubeGroup.clear()
   cubies = []
   for (let x = -1; x <= 1; x++) {
     for (let y = -1; y <= 1; y++) {
       for (let z = -1; z <= 1; z++) {
-        const cubie = createCubie(x, y, z)
-        cubies.push(cubie)
-        cubeGroup.add(cubie)
+        const c = createCubie(x, y, z)
+        cubies.push(c)
+        cubeGroup.add(c)
       }
     }
   }
   updateHighlight()
 }
 
-// 切换轴/层级
 function switchAxis(axis) {
   if (isRotating || mode.value === 'show') return
   activeAxis.value = axis
@@ -188,158 +180,198 @@ function switchLayer(layer) {
   updateHighlight()
 }
 
-// 高亮
 function updateHighlight() {
-  if (mode.value === 'show' || isRotating) return;
-  const axis = activeAxis.value;
-  const layer = activeLayer.value;
+  if (mode.value === 'show' || isRotating) return
+  const a = activeAxis.value
+  const l = activeLayer.value
 
-  cubies.forEach(cubie => {
-    cubie.getWorldPosition(worldPos);
-    let isSelected = false;
-    const wx = Math.round(worldPos.x);
-    const wy = Math.round(worldPos.y);
-    const wz = Math.round(worldPos.z);
-
-    if (axis === 'x' && wx === layer) isSelected = true;
-    if (axis === 'y' && wy === layer) isSelected = true;
-    if (axis === 'z' && wz === layer) isSelected = true;
-
-    cubie.userData.border.material.color.set(isSelected ? 0xffffff : 0x000000);
-  });
+  cubies.forEach(c => {
+    const cx = Math.round(c.position.x)
+    const cy = Math.round(c.position.y)
+    const cz = Math.round(c.position.z)
+    let sel = false
+    if (a === 'x' && cx === l) sel = true
+    if (a === 'y' && cy === l) sel = true
+    if (a === 'z' && cz === l) sel = true
+    c.userData.border.material.color.setHex(sel ? 0xffffff : 0x000000)
+  })
 }
 
-// 旋转层
+// ==========================================
+// 核心：完美旋转（中心自转 + 外围公转，颜色不乱）
+// ==========================================
 function rotateLayer(clockwise) {
   if (isRotating || mode.value === 'show') return
   isRotating = true
-  
+
   const axis = activeAxis.value
   const layer = activeLayer.value
-  const targetAngle = clockwise ? -Math.PI / 2 : Math.PI / 2
-  
-  const targetCubies = cubies.filter(cubie => {
-    cubie.getWorldPosition(worldPos)
-    const wx = Math.round(worldPos.x)
-    const wy = Math.round(worldPos.y)
-    const wz = Math.round(worldPos.z)
-    if (axis === 'x') return wx === layer
-    if (axis === 'y') return wy === layer
-    if (axis === 'z') return wz === layer
+  const angle = Math.PI / 2
+  const dir = clockwise ? 1 : -1
+
+  // 找到需要旋转的小方块
+  const targets = cubies.filter(c => {
+    const cx = Math.round(c.position.x)
+    const cy = Math.round(c.position.y)
+    const cz = Math.round(c.position.z)
+    if (axis === 'x' && cx === layer) return true
+    if (axis === 'y' && cy === layer) return true
+    if (axis === 'z' && cz === layer) return true
+    return false
   })
 
-  const pivot = new THREE.Group()
-  scene.add(pivot)
-  targetCubies.forEach(cubie => pivot.attach(cubie))
+  // 找到旋转中心点
+  const center = new THREE.Vector3(
+    axis === 'x' ? layer : 0,
+    axis === 'y' ? layer : 0,
+    axis === 'z' ? layer : 0
+  )
 
-  let currentAngle = 0
-  const animateRotate = () => {
-    const step = targetAngle * 0.1
-    currentAngle += step
-    
-    if (axis === 'x') pivot.rotation.x = currentAngle
-    if (axis === 'y') pivot.rotation.y = currentAngle
-    if (axis === 'z') pivot.rotation.z = currentAngle
-    
-    if (Math.abs(currentAngle) < Math.abs(targetAngle)) {
-      requestAnimationFrame(animateRotate)
+  // 记录每个方块的初始旋转四元数和位置
+  targets.forEach(c => {
+    c.userData.startPosition = c.position.clone()
+    c.userData.startQuaternion = c.quaternion.clone()
+  })
+
+  let rotated = 0
+  const speed = 0.08
+
+  function animateRot() {
+    const step = Math.min(speed, angle - rotated)
+    rotated += step
+
+    // 手动计算每个方块的新位置，不使用pivot进行旋转（避免自转）
+    targets.forEach(c => {
+      // 获取相对中心的位置
+      const relPos = c.userData.startPosition.clone().sub(center)
+      let newPos = relPos.clone()
+
+      // 根据轴旋转位置
+      if (axis === 'x') {
+        // 绕X轴旋转 - 只影响y和z坐标
+        const y = relPos.y
+        const z = relPos.z
+        // 修正X轴旋转方向
+        newPos.y = y * Math.cos(rotated * dir) - z * Math.sin(rotated * dir)
+        newPos.z = y * Math.sin(rotated * dir) + z * Math.cos(rotated * dir)
+      } else if (axis === 'y') {
+        // 绕Y轴旋转 - 只影响x和z坐标
+        const x = relPos.x
+        const z = relPos.z
+        newPos.x = x * Math.cos(rotated * dir) + z * Math.sin(rotated * dir)
+        newPos.z = -x * Math.sin(rotated * dir) + z * Math.cos(rotated * dir)
+      } else if (axis === 'z') {
+        // 绕Z轴旋转 - 只影响x和y坐标
+        const x = relPos.x
+        const y = relPos.y
+        newPos.x = x * Math.cos(rotated * dir) - y * Math.sin(rotated * dir)
+        newPos.y = x * Math.sin(rotated * dir) + y * Math.cos(rotated * dir)
+      }
+
+      // 更新位置（加回中心点偏移）
+      c.position.copy(newPos.add(center))
+
+      // 不改变方块的自身旋转，只改变位置
+      c.quaternion.copy(c.userData.startQuaternion)
+    })
+
+    if (rotated < angle) {
+      requestAnimationFrame(animateRot)
     } else {
-      finishRotation(targetCubies, pivot)
+      // 完成旋转，确保位置规整
+      targets.forEach(c => {
+        c.position.x = Math.round(c.position.x)
+        c.position.y = Math.round(c.position.y)
+        c.position.z = Math.round(c.position.z)
+
+        // 更新面的颜色顺序
+        updateFace(c, axis, clockwise)
+
+        // 清理临时数据
+        delete c.userData.startPosition
+        delete c.userData.startQuaternion
+      })
+
+      isRotating = false
+      updateHighlight()
     }
   }
-  animateRotate()
+
+  animateRot()
 }
 
-function finishRotation(targetCubies, pivot) {
-  targetCubies.forEach(cubie => {
-    cubeGroup.attach(cubie)
-    cubie.updateMatrixWorld(true)
-  })
-  scene.remove(pivot)
-  updateHighlight()
-  isRotating = false
+// 正确更新颜色面
+function updateFace(cubie, axis, cw) {
+  const tmp = [...cubie.material]
+  const result = [...tmp]
+
+  if (axis === 'y') {
+    // Y 轴（你原来的是对的）
+    if (cw) {
+      result[0] = tmp[4]; result[1] = tmp[5]; result[4] = tmp[1]; result[5] = tmp[0]
+    } else {
+      result[0] = tmp[5]; result[1] = tmp[4]; result[4] = tmp[0]; result[5] = tmp[1]
+    }
+  } 
+  // ====================== 重点修复：X 轴 ======================
+  else if (axis === 'x') {
+    if (cw) {
+      // 顺时针 X 轴：上 → 前 → 下 → 后 → 上 正确轮换
+      result[2] = tmp[5] // 上 = 原来的后
+      result[3] = tmp[4] // 下 = 原来的前
+      result[4] = tmp[2] // 前 = 原来的上
+      result[5] = tmp[3] // 后 = 原来的下
+    } else {
+      // 逆时针 X 轴
+      result[2] = tmp[4]
+      result[3] = tmp[5]
+      result[4] = tmp[3]
+      result[5] = tmp[2]
+    }
+  }
+  // ==========================================================
+  else if (axis === 'z') {
+    // Z 轴（你原来的是对的）
+    if (cw) {
+      result[0] = tmp[3]; result[1] = tmp[2]; result[2] = tmp[0]; result[3] = tmp[1]
+    } else {
+      result[0] = tmp[2]; result[1] = tmp[3]; result[2] = tmp[1]; result[3] = tmp[0]
+    }
+  }
+
+  cubie.material = result
 }
 
-// 重置
 function resetCube() {
   if (isRotating || mode.value === 'show') return
-  cubies.forEach(cubie => {
-    cubie.position.copy(cubie.userData.originalPos)
-    cubie.rotation.set(0, 0, 0)
-    cubie.updateMatrixWorld(true)
-  })
+  initRubiksCube()
   activeAxis.value = 'y'
   activeLayer.value = 0
-  updateHighlight()
 }
 
-function switchMode(newMode) {
+function switchMode(m) {
   if (isRotating) return
-  mode.value = newMode
-
-  if (newMode === 'show') {
-    controls.enabled = false
-  } else {
-    controls.enabled = true
-  }
+  mode.value = m
+  controls.enabled = m === 'game'
 }
 
-function updateShowMode() {
-  const isShow = mode.value === 'show';
-
-  if (isShow) {
-    cubeGroup.rotation.y += autoRotateSpeed;
-  } else {
-    cubeGroup.rotation.y *= 0.9;
-  }
-
-  cubies.forEach(c => {
-    const ox = c.userData.originalPos.x;
-    const oy = c.userData.originalPos.y;
-    const oz = c.userData.originalPos.z;
-
-    let targetX, targetY, targetZ;
-    if (isShow) {
-      targetX = ox + (ox === 0 ? 0 : ox * 1.3);
-      targetY = oy + (oy === 0 ? 0 : oy * 1.3);
-      targetZ = oz + (oz === 0 ? 0 : oz * 1.3);
-    } else {
-      targetX = ox;
-      targetY = oy;
-      targetZ = oz;
-    }
-    c.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), blendSpeed);
-
-    c.material.forEach(m => {
-      m.emissive.set(m.color);
-      m.emissiveIntensity = isShow ? 0.8 : m.emissiveIntensity * 0.9;
-    });
-
-    const border = c.userData.border;
-    
-    if (isShow) {
-      border.visible = true;
-      border.material.color.set(0xffffff);
-    } else {
-      border.visible = true; 
-    }
-  });
-}
-
-// 锁定/解锁滚动
+// 锁定滚动
 function togglePageLock() {
   emit('toggle-page-lock', !pageLocked)
 }
 
-// 主渲染
+// ==========================================
+// 修复爆栈 animate 函数！！！
+// ==========================================
 function animate() {
-  requestAnimationFrame(animate)
+  requestAnimationFrame(animate) // ✅ 正确写法
   controls.update()
-  updateShowMode()
+  if (mode.value === 'show') {
+    cubeGroup.rotation.y += 0.003
+  }
   renderer.render(scene, camera)
 }
 
-// 窗口大小
 function handleResize() {
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
@@ -364,7 +396,6 @@ onUnmounted(() => {
 .rubiks-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
 .cube-canvas { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
 
-/* 深色模式（默认） */
 .control-panel {
   position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.8);
@@ -376,8 +407,6 @@ onUnmounted(() => {
   box-shadow: 0 0 10px rgba(0,0,0,0.5);
   transition: all 0.3s ease;
 }
-
-/* 浅色模式 */
 .control-panel.isDark {
   background: rgba(250, 247, 240, 0.95);
   color: #111111;
@@ -385,53 +414,61 @@ onUnmounted(() => {
 }
 
 .control-panel h3 { text-align: center; margin-bottom: 12px; }
+.mode-select, .axis-select, .layer-select, .rotate-btns {
+  margin: 12px 0; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.lock-btn-container { margin-top: 10px; display: flex; justify-content: center; }
+.lock-btn { padding: 8px 16px; background: #17a2b8 !important; color: #fff !important; font-weight: bold; width: 100%; }
+.lock-btn:hover { background: #138496 !important; }
 
-.mode-select {
-  margin: 0 0 15px 0; display: flex; gap: 8px; justify-content: center;
-}
-.axis-select, .layer-select, .rotate-btns {
-  margin: 15px 0; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
-}
-
-.lock-btn-container {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-}
-.lock-btn {
-  padding: 8px 16px;
-  background: #17a2b8 !important;
-  color: #fff !important;
-  font-weight: bold;
-  width: 100%;
-}
-.lock-btn:hover {
-  background: #138496 !important;
-}
-
-/* 按钮深色 */
 button {
-  padding: 7px 14px; border: none; border-radius: 5px; cursor: pointer;
-  background: #444;
+  padding: 7px 14px;
+  border: 1px solid #1aa2a9;  /* 白色边框 = 镂空感 */
+  border-radius: 5px;
+  cursor: pointer;
+  background: transparent; /* 透明底 */
   color: white;
-  transition: all 0.2s ease; font-size: 14px;
+  transition: all 0.25s ease;
 }
-button:hover { background: #666; transform: translateY(-1px); }
-button.active { background: #007bff; color: #fff; font-weight: bold; }
-button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* 按钮浅色 */
+/* 悬浮：半透明填充 */
+button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 激活：实心高亮 */
+button.active {
+  background: #023a52;
+  border-color: #007bff;
+  color: #fff;
+  font-weight: bold;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 亮色模式下的镂空样式 */
 .control-panel.isDark button {
-  background: #e0e0e0;
+  border-color: #333;
+  background: transparent;
   color: #111;
 }
 .control-panel.isDark button:hover {
-  background: #d0d0d0;
+  background: rgba(0, 0, 0, 0.05);
 }
 .control-panel.isDark button.active {
-  background: #007bff;
+  background: #034285;
+  border-color: #073b74;
   color: #fff;
 }
 
-.reset-btn { background: #dc3545 !important; font-weight: bold; color: #fff !important; }
+/* 重置按钮特殊样式 */
+.reset-btn {
+  background: #64030c !important;
+  border-color: #dc3545 !important;
+  font-weight: bold;
+  color: #fff !important;
+}
 </style>

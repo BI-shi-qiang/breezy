@@ -44,7 +44,7 @@
               @click="switchToHuman"
               style="
                 padding: 6px 12px;
-                background: #1677ff;
+                background: #a92a2a;
                 color: #fff;
                 border: none;
                 border-radius: 6px;
@@ -118,8 +118,8 @@ const props = defineProps({
 });
 const emit = defineEmits(["toggle-page-lock"]);
 
-const API_BASE = "https://api.bsq.asia";
-
+// const API_BASE = "https://api.bsq.asia";
+const API_BASE = "http://localhost:3000";
 const input = ref("");
 const messages = ref<any[]>([]);
 const isLoading = ref(false);
@@ -131,8 +131,8 @@ const sessionScrollMap = ref<Record<string, number>>({});
 let es: EventSource | null = null;
 
 // ====================== WebSocket 实时聊天（我帮你加好了） ======================
-const socket = io("https://api.bsq.asia");
-
+// const socket = io("https://api.bsq.asia");
+const socket = io("http://localhost:3000");
 onMounted(() => {
   // 监听新消息推送 → 自动刷新
   socket.on("newMessage", () => {
@@ -209,6 +209,42 @@ function createNewChat() {
     title: `对话 ${sessionList.value.length + 1}`,
   });
   switchSession(newId);
+  setTimeout(async () => {
+    // 直接让AI发欢迎语
+    await sendWelcomeMessage();
+  }, 300);
+}
+
+// 欢迎语
+async function sendWelcomeMessage() {
+  if (isLoading.value) return;
+  if (es) es.close();
+
+  isLoading.value = true;
+
+  const url = `${API_BASE}/chat/stream?sessionId=${currentSessionId.value}&message=${encodeURIComponent("问世间情为何物？")}`;
+
+  try {
+    es = new EventSource(url);
+    es.onmessage = (e) => {
+      if (e.data === "[DONE") {
+        es?.close();
+        isLoading.value = false;
+        loadAllSessions();
+        return;
+      }
+      const last = messages.value[messages.value.length - 1];
+      last?.role === "ai"
+        ? (last.content += e.data)
+        : messages.value.push({ role: "ai", content: e.data });
+    };
+    es.onerror = () => {
+      es?.close();
+      isLoading.value = false;
+    };
+  } catch (err) {
+    isLoading.value = false;
+  }
 }
 
 // 删除会话
@@ -375,8 +411,8 @@ const sendMessage = async () => {
 .float-ball {
   width: 60px;
   height: 60px;
-  border-radius: 50%;
-  background: #05949f;
+  border-radius: 30%;
+  background: #308bc4;
   color: white;
   display: flex;
   align-items: center;
@@ -409,7 +445,7 @@ const sendMessage = async () => {
 
 .chat-header {
   padding: 14px 16px;
-  background: #05949f;
+  background: #8e0000;
   color: white;
   font-weight: 500;
   display: flex;
@@ -443,7 +479,7 @@ const sendMessage = async () => {
 }
 .new-chat-btn {
   padding: 8px 10px;
-  background: #05949f;
+  background: #a92a2a;
   color: white;
   border: none;
   border-radius: 6px;
@@ -587,7 +623,7 @@ const sendMessage = async () => {
 }
 .send-btn {
   padding: 12px 18px;
-  background: #05949f;
+  background: #8e0000;
   color: white;
   border: none;
   border-radius: 8px;
