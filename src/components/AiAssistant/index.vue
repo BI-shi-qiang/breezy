@@ -130,11 +130,10 @@ const messageListEl = ref<HTMLElement | null>(null);
 const sessionScrollMap = ref<Record<string, number>>({});
 let es: EventSource | null = null;
 
-// ====================== WebSocket 实时聊天（我帮你加好了） ======================
+// ====================== WebSocket 实时聊天 ======================
 const socket = io("https://api.bsq.asia");
 // const socket = io("http://localhost:3000");
 onMounted(() => {
-  // 监听新消息推送 → 自动刷新
   socket.on("newMessage", () => {
     if (currentSessionId.value) {
       refreshChatHistory();
@@ -147,7 +146,6 @@ onUnmounted(() => {
   if (es) es.close();
 });
 
-// 当切换会话时，重新加入房间
 watch(currentSessionId, (newId) => {
   if (newId) {
     socket.emit("joinSession", newId);
@@ -210,7 +208,6 @@ function createNewChat() {
   });
   switchSession(newId);
   setTimeout(async () => {
-    // 直接让AI发欢迎语
     await sendWelcomeMessage();
   }, 300);
 }
@@ -303,7 +300,7 @@ async function switchSession(id: string) {
   }
 }
 
-// ====================== 刷新聊天记录（实时更新用） ======================
+// ====================== 刷新聊天记录 ======================
 async function refreshChatHistory() {
   const id = currentSessionId.value;
   if (!id) return;
@@ -335,18 +332,16 @@ const sendMessage = async () => {
 
   const userMsg = input.value.trim();
 
-  // ====================== 【关键修复：先发请求查是不是人工模式】 ======================
+  // 查询是否人工模式
   const statusRes = await fetch(
     `${API_BASE}/chat/session-status/${currentSessionId.value}`,
   );
   const statusData = await statusRes.json();
 
-  // 如果是人工模式 → 只存消息，不调用AI
   if (statusData.status === "human") {
     messages.value.push({ role: "user", content: userMsg });
     input.value = "";
 
-    // ✅ 调用普通接口，不走 SSE
     await fetch(`${API_BASE}/chat/user-send-message`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -358,9 +353,8 @@ const sendMessage = async () => {
 
     return;
   }
-  // ==================================================================================
 
-  // 下面是原来的 AI 逻辑
+  // AI 模式逻辑
   messages.value.push({ role: "user", content: userMsg });
   input.value = "";
   isLoading.value = true;
@@ -401,6 +395,7 @@ const sendMessage = async () => {
 </script>
 
 <style scoped>
+/* 全局容器 */
 .ai-float-assistant {
   position: fixed;
   right: 20px;
@@ -408,6 +403,7 @@ const sendMessage = async () => {
   z-index: 9999;
 }
 
+/* 悬浮球 */
 .float-ball {
   width: 60px;
   height: 60px;
@@ -429,24 +425,34 @@ const sendMessage = async () => {
   transform: scale(1.05);
 }
 
+/* 聊天窗口 - 核心修复：手机端全屏 + 键盘适配 */
 .chat-window {
-  position: absolute;
+  position: fixed;
   right: 0;
   bottom: 0;
-  width: 700px;
-  height: 650px;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
   background: white;
-  border-radius: 16px;
+  border-radius: 0;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
-@media (max-width: 768px) {
+
+/* PC端恢复圆角大小 */
+@media (min-width: 768px) {
   .chat-window {
-    width: 92vw;
+    width: 700px;
+    height: 650px;
+    border-radius: 16px;
+    left: auto;
+    top: auto;
   }
 }
+
 .chat-header {
   padding: 14px 16px;
   background: #8e0000;
@@ -455,6 +461,7 @@ const sendMessage = async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 .close-btn {
   background: none;
@@ -465,13 +472,14 @@ const sendMessage = async () => {
   line-height: 1;
 }
 
+/* 主内容区 */
 .app-container {
   display: flex;
   flex: 1;
-  height: calc(100% - 48px);
   overflow: hidden;
 }
 
+/* 侧边栏 */
 .sidebar {
   width: 160px;
   background: #f7f8fa;
@@ -480,7 +488,15 @@ const sendMessage = async () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex-shrink: 0;
 }
+/* 手机端侧边栏缩小 */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 120px;
+  }
+}
+
 .new-chat-btn {
   padding: 8px 10px;
   background: #a92a2a;
@@ -496,7 +512,6 @@ const sendMessage = async () => {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -543,13 +558,13 @@ const sendMessage = async () => {
   font-weight: 500;
 }
 
-/* === 聊天消息结构 + AI 头像 === */
+/* 聊天区域 */
 .chat-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  height: 100%;
+  padding: 12px;
+  overflow: hidden;
 }
 .message-list {
   flex: 1;
@@ -558,9 +573,8 @@ const sendMessage = async () => {
   flex-direction: column;
   gap: 12px;
   margin-bottom: 12px;
-  max-height: 100%;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .message-list::-webkit-scrollbar {
   display: none;
@@ -613,9 +627,11 @@ const sendMessage = async () => {
   font-style: italic;
 }
 
+/* 输入框区域 - 防止键盘顶飞 */
 .input-bar {
   display: flex;
   gap: 10px;
+  flex-shrink: 0;
 }
 .input {
   flex: 1;
