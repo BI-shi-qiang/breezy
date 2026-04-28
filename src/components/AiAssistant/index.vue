@@ -442,7 +442,11 @@ const sendMessage = async () => {
   display: flex;
   flex-direction: column;
 }
-
+@media (max-width: 768px) {
+  .chat-window {
+    width: 92vw;
+  }
+}
 .chat-header {
   padding: 14px 16px;
   background: #8e0000;
