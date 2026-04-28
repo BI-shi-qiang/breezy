@@ -495,6 +495,7 @@ const sendMessage = async () => {
   .sidebar {
     width: 120px;
   }
+
 }
 
 .new-chat-btn {
@@ -649,6 +650,7 @@ const sendMessage = async () => {
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  margin-right:15px;
 }
 .send-btn:disabled {
   background: #93c5fd;
