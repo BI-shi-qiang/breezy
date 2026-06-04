@@ -36,10 +36,10 @@
           <a href="https://space.bilibili.com/1425205072" target="_blank" class="nav-link platform-link">
             <img src="@/assets/bilibili.png" class="icon-img" />
           </a>
-          <a href="https://www.facebook.com/" target="_blank" class="nav-link platform-link">
+          <a href="https://www.facebook.com/profile.php?id=61590241305944" target="_blank" class="nav-link platform-link">
             <img src="@/assets/facebook.png" class="icon-img" />
           </a>
-          <a href="https://twitter.com/" target="_blank" class="nav-link platform-link">
+          <a href="https://x.com/shiqiangbi56" target="_blank" class="nav-link platform-link">
             <img src="@/assets/twitter.png" class="icon-img" />
           </a>
           <a href="https://juejin.cn/user/1963060424624064" target="_blank" class="nav-link platform-link">
@@ -108,10 +108,10 @@
         <a href="https://space.bilibili.com/1425205072" target="_blank" class="mobile-link">
           <img src="@/assets/bilibili.png" class="icon-img" /> BiliBili
         </a>
-        <a href="https://www.facebook.com/" target="_blank" class="mobile-link">
+        <a href="https://www.facebook.com/profile.php?id=61590241305944" target="_blank" class="mobile-link">
           <img src="@/assets/facebook.png" class="icon-img" /> Facebook
         </a>
-        <a href="https://twitter.com/" target="_blank" class="mobile-link">
+        <a href="https://x.com/shiqiangbi56" target="_blank" class="mobile-link">
           <img src="@/assets/twitter.png" class="icon-img" /> Twitter
         </a>
         <a href="https://juejin.cn/user/1963060424624064" target="_blank" class="mobile-link">
