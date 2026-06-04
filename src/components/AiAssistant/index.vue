@@ -118,9 +118,8 @@ const props = defineProps({
 });
 const emit = defineEmits(["toggle-page-lock"]);
 
-// const API_BASE = "https://api.bsq.asia";
+const API_BASE = "https://api.bsq.asia";
 // const API_BASE = "http://localhost:3000";
-const API_BASE = "http://frp-air.com:60910";
 const input = ref("");
 const messages = ref<any[]>([]);
 const isLoading = ref(false);
@@ -132,9 +131,8 @@ const sessionScrollMap = ref<Record<string, number>>({});
 let es: EventSource | null = null;
 
 // ====================== WebSocket 实时聊天 ======================
-// const socket = io("https://api.bsq.asia");
+const socket = io("https://api.bsq.asia");
 // const socket = io("http://localhost:3000");
-const socket = io("http://frp-air.com:60910");
 onMounted(() => {
   socket.on("newMessage", () => {
     if (currentSessionId.value) {

@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     host: true,
   },
-  base: "/breezy/",
+  base: "/",
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
