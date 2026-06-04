@@ -118,8 +118,9 @@ const props = defineProps({
 });
 const emit = defineEmits(["toggle-page-lock"]);
 
-const API_BASE = "https://api.bsq.asia";
+// const API_BASE = "https://api.bsq.asia";
 // const API_BASE = "http://localhost:3000";
+const API_BASE = "http://frp-air.com:60910";
 const input = ref("");
 const messages = ref<any[]>([]);
 const isLoading = ref(false);
@@ -131,8 +132,9 @@ const sessionScrollMap = ref<Record<string, number>>({});
 let es: EventSource | null = null;
 
 // ====================== WebSocket 实时聊天 ======================
-const socket = io("https://api.bsq.asia");
+// const socket = io("https://api.bsq.asia");
 // const socket = io("http://localhost:3000");
+const socket = io("http://frp-air.com:60910");
 onMounted(() => {
   socket.on("newMessage", () => {
     if (currentSessionId.value) {
@@ -260,6 +262,8 @@ async function deleteSession(sessionId: string) {
 
 // 转人工
 const switchToHuman = async () => {
+  const confirmRes = confirm("确定要切换到人工服务吗？阿毕会尽快收到提醒！");
+  if (!confirmRes) return; // 取消则不执行
   await fetch(`${API_BASE}/chat/switch-human/${currentSessionId.value}`);
   alert("已切换为人工服务，客服将尽快回复您");
 };
