@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=40&duration=3000&pause=1000&color=00AAFF&center=true&vCenter=true&width=600&height=70&lines=%E6%AF%95%E4%B8%96%E5%BC%BA%E7%9A%84%E4%B8%AA%E4%BA%BA%E7%BD%91%E7%AB%99" alt="毕世强的个人网站" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=40&duration=3000&pause=1000&color=00AAFF&center=true&vCenter=true&width=600&height=70&lines=%E6%AF%95%E4%B8%96%E5%BC%BA%E7%9A%84%E4%B8%AA%E4%BA%BA%E7%BD%91%E7%AB%99" alt="shiqiang's personal website" />
 </h1>
 
 <p align="center">
