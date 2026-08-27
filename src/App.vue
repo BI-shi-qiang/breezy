@@ -3,13 +3,13 @@
     class="viewport"
     :class="{ 'theme-dark': isDark, 'theme-light': !isDark }"
   >
-    <WebBack v-if="isDark" />
+    <!-- <WebBack v-if="isDark" /> -->
     <!-- 直接使用封装好的导航栏组件 -->
     <TabVue @theme-change="onThemeChange" @page-lock="handlePageLock" :isDark="isDark" />
     <div class="wrapper" :style="wrapperStyle">
       <div class="page">
         <div class="page-content">
-          <HomeWelcome :isDark="isDark" />
+          <BedroomModel :isDark="isDark" />
         </div>
       </div>
       <div class="page">
@@ -33,10 +33,10 @@ import WebBack from "./components/WebBack/index.vue";
 import TabVue from "./components/TabVue/index.vue";
 import MagicCube from "./components/MagicCube/index.vue";
 import HangingTagCard from "./components/HangingTagCard/index.vue";
-import HomeWelcome from "./components/HomeWelcome/index.vue";
+import BedroomModel from "./components/BedroomModel/index.vue";
 import AiAssistant from "./components/AiAssistant/index.vue";
 
-const isDark = ref(true);
+const isDark = ref(false);
 function onThemeChange(val) {
   isDark.value = val;
 }
