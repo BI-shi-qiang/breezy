@@ -59,7 +59,7 @@ function init() {
   controls.enableRotate = true
   controls.enableZoom = false // 禁用滚轮缩放,让滚轮继续触发翻页
   controls.enablePan = false // 禁用平移
-  controls.touches.ONE = THREE.TOUCH.PAN // 单指触摸映射为平移(已禁用),避免和翻页手势冲突
+  controls.touches.ONE = THREE.TOUCH.ROTATE // 单指触摸旋转(手机可左右拖拽查看)
   controls.addEventListener('change', render) // 拖拽时按需重绘,不跑常驻循环
 
   // 光线投射(用于检测鼠标是否悬停/点击到门和屏幕)
@@ -109,16 +109,21 @@ function frameModel(model) {
   const size = box.getSize(new THREE.Vector3())
   const center = box.getCenter(new THREE.Vector3())
 
-  const maxDim = Math.max(size.x, size.y, size.z)
-  const fov = (camera.fov * Math.PI) / 180
-  // 距离倍率:数值越大,模型在画面里越小(1.0 刚好填满,这里留出更多留白)
-  const dist = (maxDim / (2 * Math.tan(fov / 2))) * 1.8
-
   controls.target.copy(center)
-  // 相机偏移(相对中心):X 左右、Y 上下、Z 前后
-  camera.position.set(center.x + dist * 0.6, center.y + dist * 0.25, center.z + dist * 0.65)
-  camera.near = maxDim / 200
-  camera.far = maxDim * 50
+
+  // 相机方向(3/4 视角),归一化后 dist 就是真实距离
+  const dir = new THREE.Vector3(0.6, 0.25, 0.65).normalize()
+
+  // 按模型宽高 + 视场角 + 屏幕宽高比计算距离,保证手机竖屏也完整展示(不裁剪)
+  const fov = (camera.fov * Math.PI) / 180
+  const tanHalf = Math.tan(fov / 2)
+  const distX = (size.x / 2) / (tanHalf * camera.aspect)
+  const distY = (size.y / 2) / tanHalf
+  const dist = Math.max(distX, distY) * 1.6
+
+  camera.position.copy(center).addScaledVector(dir, dist)
+  camera.near = Math.max(dist * 0.05, 0.1)
+  camera.far = dist * 20
   camera.updateProjectionMatrix()
   controls.update()
 }
