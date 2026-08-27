@@ -122,8 +122,8 @@ function frameModel(model) {
   const dist = Math.max(distX, distY) * 1.6
 
   camera.position.copy(center).addScaledVector(dir, dist)
-  camera.near = Math.max(dist * 0.05, 0.1)
-  camera.far = dist * 20
+  camera.near = 0.05 // 足够小,聚焦屏幕/垃圾桶等小物体时不会被近裁剪面裁掉(卡模)
+  camera.far = 500
   camera.updateProjectionMatrix()
   controls.update()
 }
@@ -393,12 +393,10 @@ function focusOn(targetPos, targetLookAt, name) {
 
 // 点击屏幕:相机缓慢移动到屏幕正前方(图片直接显示在 3D 屏幕上)
 function focusOnScreen() {
-  const center = new THREE.Vector3()
-  screenMesh.getWorldPosition(center)
-  const normal = getScreenNormal()
-
   const box = new THREE.Box3().setFromObject(screenMesh)
   const size = box.getSize(new THREE.Vector3())
+  const center = box.getCenter(new THREE.Vector3()) // 用包围盒中心,避免 mesh 原点偏移导致贴太近
+  const normal = getScreenNormal()
   // 按屏幕宽高 + 相机 FOV 精确计算距离,屏幕放大到占画面约 90%(留 10% 边距)
   const fov = (camera.fov * Math.PI) / 180
   const tanHalf = Math.tan(fov / 2)
@@ -418,8 +416,13 @@ function focusOnTrash() {
   const topY = box.max.y
 
   const maxDim = Math.max(size.x, size.z)
-  const dist = Math.max(maxDim * 1.5, 0.3)
-  const off = maxDim * 0.2 // 略偏一点,避免正上方云台锁
+  // 按桶口尺寸 + 视场角 + 屏幕宽高比算高度,手机竖屏也不会贴太近
+  const fov = (camera.fov * Math.PI) / 180
+  const tanHalf = Math.tan(fov / 2)
+  const distY = (maxDim / 2) / tanHalf
+  const distX = (maxDim / 2) / (tanHalf * camera.aspect)
+  const dist = Math.max(distX, distY) * 1.5
+  const off = dist * 0.25 // 斜角约 14°,避免正上方云台锁
 
   const topCenter = new THREE.Vector3(center.x, topY, center.z)
   const targetPos = new THREE.Vector3(topCenter.x + off, topY + dist, topCenter.z + off)
