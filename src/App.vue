@@ -3,7 +3,6 @@
     class="viewport"
     :class="{ 'theme-dark': isDark, 'theme-light': !isDark }"
   >
-    <!-- <WebBack v-if="isDark" /> -->
     <!-- 直接使用封装好的导航栏组件 -->
     <TabVue @theme-change="onThemeChange" @page-lock="handlePageLock" :isDark="isDark" />
     <div class="wrapper" :style="wrapperStyle">
@@ -23,13 +22,12 @@
         </div>
       </div>
     </div>
-    <AiAssistant :pageLocked="pageLocked" @toggle-page-lock="handlePageLock" />
+    <AiAssistant :isDark="isDark" :pageLocked="pageLocked" @toggle-page-lock="handlePageLock" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import WebBack from "./components/WebBack/index.vue";
 import TabVue from "./components/TabVue/index.vue";
 import MagicCube from "./components/MagicCube/index.vue";
 import HangingTagCard from "./components/HangingTagCard/index.vue";

@@ -92,6 +92,9 @@ function init() {
       setupScreen(model)
       setupTrash(model)
 
+      // 把电脑屏幕贴图换成项目里的图片
+      setScreenTexture('/image/xiaowo.png')
+
       loading.value = false
       render()
     },
@@ -119,7 +122,9 @@ function frameModel(model) {
   const tanHalf = Math.tan(fov / 2)
   const distX = (size.x / 2) / (tanHalf * camera.aspect)
   const distY = (size.y / 2) / tanHalf
-  const dist = Math.max(distX, distY) * 1.6
+  // PC 端把相机拉远让模型显示更小，移动端保持紧凑
+  const scale = window.innerWidth >= 768 ? 2.5 : 1.6
+  const dist = Math.max(distX, distY) * scale
 
   camera.position.copy(center).addScaledVector(dir, dist)
   camera.near = 0.05 // 足够小,聚焦屏幕/垃圾桶等小物体时不会被近裁剪面裁掉(卡模)
@@ -459,6 +464,27 @@ function animateCamera(targetPos, targetLookAt, onDone) {
 
 // ============ 换电脑屏幕贴图 ============
 
+// 把屏幕 mesh 的 UV 从原图(atlas)子区域拉伸到 0-1，让新图完整平铺屏幕
+function normalizeScreenUV(mesh) {
+  const uv = mesh.geometry.attributes.uv
+  if (!uv) return
+  let minU = Infinity, minV = Infinity, maxU = -Infinity, maxV = -Infinity
+  for (let i = 0; i < uv.count; i++) {
+    const u = uv.getX(i)
+    const v = uv.getY(i)
+    if (u < minU) minU = u
+    if (u > maxU) maxU = u
+    if (v < minV) minV = v
+    if (v > maxV) maxV = v
+  }
+  const du = maxU - minU || 1
+  const dv = maxV - minV || 1
+  for (let i = 0; i < uv.count; i++) {
+    uv.setXY(i, (uv.getX(i) - minU) / du, (uv.getY(i) - minV) / dv)
+  }
+  uv.needsUpdate = true
+}
+
 // 前端直接替换屏幕贴图,无需回 Blender 重新导出
 function setScreenTexture(url) {
   const screenMat = findScreenMaterial()
@@ -467,22 +493,30 @@ function setScreenTexture(url) {
     return
   }
 
-  const old = screenMat.map
+  // 屏幕 UV 原本只覆盖原图的一小块区域，先归一化到 0-1 才能完整显示新图
+  if (screenMesh) {
+    normalizeScreenUV(screenMesh)
+    screenMesh.visible = false // 新图就绪前先隐藏，避免旧贴图闪一下
+  }
+
   new THREE.TextureLoader().load(url, (tex) => {
     tex.colorSpace = THREE.SRGBColorSpace
-    // 保留原贴图的 UV 变换(缩放/偏移/翻转),让新图正确贴合屏幕
-    if (old) {
-      tex.repeat.copy(old.repeat)
-      tex.offset.copy(old.offset)
-      tex.rotation = old.rotation
-      tex.center.copy(old.center)
-      tex.flipY = old.flipY
-    }
+    // 重置 UV 变换，图片按 0-1 完整平铺
+    tex.wrapS = THREE.ClampToEdgeWrapping
+    tex.wrapT = THREE.ClampToEdgeWrapping
+    tex.repeat.set(1, 1)
+    tex.offset.set(0, 0)
+    tex.rotation = 0
+    tex.center.set(0, 0)
+    tex.flipY = true
+    tex.needsUpdate = true
     screenMat.map = tex
     screenMat.needsUpdate = true
+    if (screenMesh) screenMesh.visible = true
     render()
   }, undefined, (err) => {
     console.error('[BedroomModel] 屏幕贴图加载失败:', err)
+    if (screenMesh) screenMesh.visible = true // 失败也恢复显示，避免一直黑屏
   })
 }
 

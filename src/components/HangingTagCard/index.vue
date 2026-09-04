@@ -44,6 +44,7 @@
               <li>Three.js</li>
               <li>Blender</li>
               <li>Typescript</li>
+              <li>Node.js</li>
             </ul>
           </div>
         </div>
